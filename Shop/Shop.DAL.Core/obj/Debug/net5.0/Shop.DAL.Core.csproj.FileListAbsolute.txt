@@ -1,0 +1,14 @@
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\Shop.DAL.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\Shop.DAL.Core.AssemblyInfoInputs.cache
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\Shop.DAL.Core.AssemblyInfo.cs
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\Shop.DAL.Core.csproj.CoreCompileInputs.cache
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\bin\Debug\net5.0\Shop.DAL.Core.deps.json
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\bin\Debug\net5.0\Shop.DAL.Core.runtimeconfig.json
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\bin\Debug\net5.0\Shop.DAL.Core.runtimeconfig.dev.json
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\bin\Debug\net5.0\Shop.DAL.Core.dll
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\bin\Debug\net5.0\ref\Shop.DAL.Core.dll
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\bin\Debug\net5.0\Shop.DAL.Core.pdb
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\Shop.DAL.Core.dll
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\ref\Shop.DAL.Core.dll
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\Shop.DAL.Core.pdb
+C:\Users\annfi\source\repos\Shop\Shop.DAL.Core\obj\Debug\net5.0\Shop.DAL.Core.genruntimeconfig.cache
