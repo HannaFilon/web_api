@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="DTO\" />
+    <ProjectReference Include="..\Shop.DAL.Core\Shop.DAL.Core.csproj" />
   </ItemGroup>
 
 </Project>
