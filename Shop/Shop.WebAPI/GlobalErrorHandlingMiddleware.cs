@@ -37,29 +37,11 @@ namespace Shop.Business
                     statusCode = response.StatusCode
                 };
 
-                Log.Error($"{errorResponse}");
+                Log.Error(ex, $"{errorResponse}");
                 var errorJson = JsonSerializer.Serialize(errorResponse);
 
                 await response.WriteAsync(errorJson);
             }
-        }
-
-        public static void AppUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            if (Log.Logger != null && e.ExceptionObject is Exception exception)
-            {
-                UnhandledExceptions(exception);
-
-                if (e.IsTerminating)
-                {
-                    Log.CloseAndFlush();
-                }
-            }
-        }
-
-        public static void UnhandledExceptions(Exception e)
-        {
-            Log.Logger?.Error(e, "Application crashed");
         }
     }
 }

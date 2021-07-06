@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shop.DAL.Core;
 using Shop.Business;
-
+using Serilog;
 
 namespace Shop.WebAPI
 {
@@ -36,7 +36,7 @@ namespace Shop.WebAPI
             services.AddSwaggerGen();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -46,16 +46,18 @@ namespace Shop.WebAPI
             }
             else
             {
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
 
+            app.UseStaticFiles();
+            app.UseHttpsRedirection();
+
+            app.UseSerilogRequestLogging();
             app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Shop.WebAPI v1"));
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
 
             app.UseRouting();
 

@@ -15,6 +15,7 @@ namespace Shop.WebAPI
              Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Debug()
                     .Enrich.WithExceptionDetails()
+                    .Enrich.FromLogContext()
                     .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information || e.Level == LogEventLevel.Verbose)
                         .WriteTo.File(new CompactJsonFormatter(), @"Logs\\info.log"))
                     .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Debug )
@@ -25,16 +26,16 @@ namespace Shop.WebAPI
                         .WriteTo.File(new CompactJsonFormatter(), @"Logs\\err.log"))
                     .CreateLogger();
 
+            Log.Information("Starting up the application");
             CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                })
-            .UseSerilog((hostingContext, loggerConfiguration) =>
-                  loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration));
+            .UseSerilog()
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+            });
     }
 }
