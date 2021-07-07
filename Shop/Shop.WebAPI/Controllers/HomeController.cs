@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System.Text.Json;
 
 namespace Shop.WebAPI.Controllers
@@ -10,6 +11,8 @@ namespace Shop.WebAPI.Controllers
         [HttpGet]
         public IActionResult GetInfo()
         {
+            Log.Information("Hello World!");
+
             return Ok(JsonSerializer.Serialize("Hello World!"));
         }
     }
