@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Shop.Business
+namespace Shop.WebAPI
 {
     public class GlobalErrorHandlingMiddleware
     {

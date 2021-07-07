@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shop.DAL.Core;
-using Shop.Business;
 using Serilog;
 
 namespace Shop.WebAPI
