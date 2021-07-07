@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shop.DAL.Core;
 using Serilog;
+using Shop.DAL.Core;
 
 namespace Shop.WebAPI
 {
@@ -23,7 +23,7 @@ namespace Shop.WebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ShopContext>(opt =>
-            opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)

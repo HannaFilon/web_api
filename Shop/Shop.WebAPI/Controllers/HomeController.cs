@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace Shop.WebAPI.Controllers
 {
+    
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
