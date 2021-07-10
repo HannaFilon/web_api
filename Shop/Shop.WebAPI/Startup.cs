@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Shop.DAL.Core;
+using Shop.Business.Implementation;
+using Shop.Business.IServices;
+using Shop.DAL.Core.Entities;
 
 namespace Shop.WebAPI
 {
@@ -19,22 +22,24 @@ namespace Shop.WebAPI
 
         public IConfiguration Configuration { get; }
 
- 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<ShopContext>()
+                .AddDefaultTokenProviders();
+
             services.AddDbContext<ShopContext>(opt =>
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ShopContext>();
-
+           
             services.AddAutoMapper(typeof(Startup));
             services.AddControllersWithViews();
 
             services.AddSwaggerGen();
-        }
 
+            //services.AddScoped<IUserService, UserService>();
+        }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

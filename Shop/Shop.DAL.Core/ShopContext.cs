@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Shop.DAL.Core.Entities;
 using System;
 
 namespace Shop.DAL.Core
 {
-    public class ShopContext: IdentityDbContext
-    {     
-            public ShopContext(DbContextOptions<ShopContext> options) : base(options) { }    
-    }   
+    public class ShopContext : IdentityDbContext<User, Role, Guid>
+    {
+        public ShopContext(DbContextOptions<ShopContext> options) : base(options) { }
+    }
 }
