@@ -10,6 +10,7 @@ using Shop.DAL.Core;
 using Shop.Business.Implementation;
 using Shop.Business.IServices;
 using Shop.DAL.Core.Entities;
+using Shop.Business;
 
 namespace Shop.WebAPI
 {
@@ -33,12 +34,13 @@ namespace Shop.WebAPI
 
             services.AddDatabaseDeveloperPageExceptionFilter();
            
-            services.AddAutoMapper(typeof(Startup));
+            services.AddAutoMapper(typeof(AutoMap));
             services.AddControllersWithViews();
 
             services.AddSwaggerGen();
 
-            //services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmailService, EmailService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

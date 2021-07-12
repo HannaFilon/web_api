@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Shop.WebAPI.Controllers
 {
-    //[Authorize]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
@@ -14,7 +14,7 @@ namespace Shop.WebAPI.Controllers
         public IActionResult GetInfo()
         {
             Log.Information("Hello World!");
-
+            
             return Ok(JsonSerializer.Serialize("Hello World!"));
         }
     }
