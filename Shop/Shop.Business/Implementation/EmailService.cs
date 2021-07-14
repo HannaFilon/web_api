@@ -10,16 +10,18 @@ using System.Threading.Tasks;
 
 namespace Shop.Business.Implementation
 {
-    public class EmailService : IEmailService
+    public class EmailService: IEmailService
     {
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
+
 
         public EmailService(UserManager<User> userManager, IMapper mapper)
         {
             _userManager = userManager;
             _mapper = mapper;
         }
+
 
         public async Task<IdentityResult> ConfirmEmail(string email, string code)
         {
@@ -36,34 +38,31 @@ namespace Shop.Business.Implementation
                 throw new Exception();
 
             if (callback == null)
-                throw new SmtpException("The url in null.");
-
+                throw new SmtpException("The url is null.");
 
             var smtp = new SmtpClient
             {
-                Host = System.Net.Dns.GetHostName(),
+                Host = Dns.GetHostName(),
                 Port = 44394,
                 Credentials = new NetworkCredential("annfilon16@gmail.com", "11111111"),
                 EnableSsl = true,
             };
-
-            MailMessage mesg = new MailMessage
+            var message = new MailMessage
             {
-                Subject = "Email confirmation",
-                Body = "Please confirm your account by clicking this link: <a href=\""
-                                                + callback + "\">link</a>",
                 IsBodyHtml = true,
+                Subject = "Email confirmation",
+                Body = "Please confirm your account by clicking this link: "+
+                       "<a href=\"" + callback + "\">link</a>",
                 From = new MailAddress("annfilon16@gmail.com"),
             };
-
-            mesg.To.Add(new MailAddress(email));
-            smtp.Send(mesg);
+            message.To.Add(new MailAddress(email));
+            smtp.Send(message);
         }
 
-        public async Task<string> GenerateEmailConfirmationToken(UserDTO userDTO)
+        public async Task<string> GenerateEmailConfirmationToken(UserDto userDto)
         {
-            var user = _mapper.Map<User>(userDTO);
-            string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var user = _mapper.Map<User>(userDto);
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             return code;
         }

@@ -14,22 +14,23 @@ namespace Shop.WebAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
+
+
         public AuthController(IUserService userService, IEmailService emailService)
         {
             _userService = userService;
             _emailService = emailService;
         }
 
+
         [AllowAnonymous]
         [HttpPost("signIn")]
         public async Task<ActionResult> SignIn([FromBody] LoginModel loginModel)
         {
-            UserDTO userDTO = await _userService.GetByEmail(loginModel.Email);
-            if (userDTO == null)
-                return StatusCode(401, "Wrong email. Try again");
-            bool isCorrect = await _userService.CheckPassword(userDTO.Email, loginModel.Password);
-            if (!isCorrect)
-                return StatusCode(401, "Wrong password. Try again");
+            var userDto = await _userService.SignIn(loginModel.Email, loginModel.Password);
+            if (userDto == null)
+                return StatusCode(401, "Wrong email or password. Try again");
+
             return Ok();
         }
 
@@ -37,8 +38,8 @@ namespace Shop.WebAPI.Controllers
         [HttpPost("signUp")]
         public async Task<ActionResult> SignUp([FromBody] LoginModel loginModel)
         {
-            UserDTO userDTO = await _userService.GetByEmail(loginModel.Email);
-            if (userDTO != null)
+            var userDto = await _userService.GetByEmail(loginModel.Email);
+            if (userDto != null)
                 return StatusCode(400, "Account with such email already exists.");
 
             var userAdded = await _userService.SignUp(loginModel.Email, loginModel.Password);
@@ -47,31 +48,30 @@ namespace Shop.WebAPI.Controllers
                 return StatusCode(401, "The user can not be signed up. Try registering once again.");
             }
 
-            userDTO = await _userService.GetByEmail(loginModel.Email);
-            var code = await _emailService.GenerateEmailConfirmationToken(userDTO);
-            var callback = Url.Action(nameof(ConfirmEmail), "Auth", new { id = userDTO.Id, code }, Request.Scheme);
-            await _emailService.SendEmailConfirmMessage(userDTO.Email, callback);
+            userDto = await _userService.GetByEmail(loginModel.Email);
+            var code = await _emailService.GenerateEmailConfirmationToken(userDto);
+            var callback = Url.Action(nameof(ConfirmEmail), "Auth", new { id = userDto.Id, code }, Request.Scheme);
+            await _emailService.SendEmailConfirmMessage(userDto.Email, callback);
             
             return Ok();
         }
 
-       
-        
+        [AllowAnonymous]
         [HttpGet("confirmEmail", Name = "ConfirmEmailRoute")]
         public async Task<ActionResult> ConfirmEmail(string email, string code)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(code))
             {
-                 return BadRequest("");
+                 return BadRequest("Wrong email or token.");
             }
 
             var emailConfirmed = await _emailService.ConfirmEmail(email, code);
-
             if (emailConfirmed.Succeeded) 
             {
                 return Ok("");
             }
-            return BadRequest("");
+
+            return BadRequest("The email wasn't confirmed.");
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Shop.DAL.Core
 {
     public class ShopContext : IdentityDbContext<User, Role, Guid>
     {
-        public ShopContext(DbContextOptions<ShopContext> options) : base(options) { }
+        public ShopContext(DbContextOptions<ShopContext> options) 
+            : base(options) { }
     }
 }

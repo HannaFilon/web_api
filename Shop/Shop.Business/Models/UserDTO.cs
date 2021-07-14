@@ -1,7 +1,8 @@
-﻿
+﻿using System;
+
 namespace Shop.Business.Models
 {
-    public class UserDTO
+    public class UserDto
     {
         public string Id { get; set; }
         public string UserName { get; set; }

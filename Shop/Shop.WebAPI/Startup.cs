@@ -21,17 +21,17 @@ namespace Shop.WebAPI
             Configuration = configuration;
         }
 
+
         public IConfiguration Configuration { get; }
+
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<ShopContext>()
                 .AddDefaultTokenProviders();
-
             services.AddDbContext<ShopContext>(opt =>
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
             services.AddDatabaseDeveloperPageExceptionFilter();
            
             services.AddAutoMapper(typeof(AutoMap));

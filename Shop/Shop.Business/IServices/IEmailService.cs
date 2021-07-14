@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Shop.Business.Models;
-using System;
 using System.Threading.Tasks;
 
 namespace Shop.Business.IServices
@@ -9,6 +8,6 @@ namespace Shop.Business.IServices
     {
         public Task SendEmailConfirmMessage(string email, string callback);
         public Task<IdentityResult> ConfirmEmail(string email, string code);
-        public Task<string> GenerateEmailConfirmationToken(UserDTO userDTO);
+        public Task<string> GenerateEmailConfirmationToken(UserDto userDto);
     }
 }

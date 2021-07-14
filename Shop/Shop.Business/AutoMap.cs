@@ -8,7 +8,7 @@ namespace Shop.Business
     {
         public AutoMap()
         {
-            CreateMap<UserDTO, User>().ReverseMap();
+            CreateMap<UserDto, User>().ReverseMap();
         }
     }
 }
