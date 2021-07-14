@@ -75,6 +75,7 @@ namespace Shop.Business.Implementation
         {
             var user = await _userManager.FindByEmailAsync(email);
             var userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = await GetUserRole(userDto);
 
             return userDto;
         }

@@ -31,6 +31,10 @@ namespace Shop.WebAPI.Controllers
             if (userDto == null)
                 return StatusCode(401, "Wrong email or password. Try again");
 
+            var code = await _emailService.GenerateEmailConfirmationToken(userDto);
+            var callback = Url.Action(nameof(ConfirmEmail), "Auth", new { id = userDto.Id, code }, Request.Scheme);
+            await _emailService.SendEmailConfirmMessage(userDto.Email, callback);
+
             return Ok();
         }
 

@@ -42,10 +42,11 @@ namespace Shop.Business.Implementation
 
             var smtp = new SmtpClient
             {
-                Host = Dns.GetHostName(),
-                Port = 44394,
-                Credentials = new NetworkCredential("annfilon16@gmail.com", "11111111"),
+                Host = "smtp.gmail.com",
+                Port = 587,
+                Credentials = new NetworkCredential("annfilon16", "password"),
                 EnableSsl = true,
+                Timeout = 120000
             };
             var message = new MailMessage
             {
@@ -61,7 +62,7 @@ namespace Shop.Business.Implementation
 
         public async Task<string> GenerateEmailConfirmationToken(UserDto userDto)
         {
-            var user = _mapper.Map<User>(userDto);
+            var user = await _userManager.FindByEmailAsync(userDto.Email);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             return code;
