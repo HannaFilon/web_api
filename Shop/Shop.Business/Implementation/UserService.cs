@@ -4,6 +4,7 @@ using Shop.Business.IServices;
 using Shop.Business.Models;
 using Shop.DAL.Core.Entities;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Shop.Business.Implementation
@@ -31,10 +32,13 @@ namespace Shop.Business.Implementation
                 Email = email,
                 Role = "User"
             };
+
             var user = _mapper.Map<User>(userDto);
             var resultCreating = await _userManager.CreateAsync(user, password);
             if (!resultCreating.Succeeded)
-                throw new Exception("The user can not be signed up.");
+            {
+                throw new Exception("User can not be signed up.");
+            }
 
             userDto.Id = await _userManager.GetUserIdAsync(user);
 
@@ -42,7 +46,8 @@ namespace Shop.Business.Implementation
             if (!resultAdding.Succeeded)
             {
                 await _userManager.DeleteAsync(user);
-                throw new Exception("The user role can not be added.");
+
+                throw new Exception("User role can not be added.");
             }
 
             return resultCreating;
@@ -55,7 +60,7 @@ namespace Shop.Business.Implementation
             {
                 var user = await _userManager.FindByEmailAsync(email);
                 var userDto = _mapper.Map<UserDto>(user);
-                userDto.Role = await GetUserRole(userDto);
+                userDto.Role = await GetUserRole(user);
 
                 return userDto;
             }
@@ -75,22 +80,12 @@ namespace Shop.Business.Implementation
         {
             var user = await _userManager.FindByEmailAsync(email);
             var userDto = _mapper.Map<UserDto>(user);
-            userDto.Role = await GetUserRole(userDto);
+            userDto.Role = await GetUserRole(user);
 
             return userDto;
         }
 
-        public async Task Logout()
-        {
-            await _signInManager.SignOutAsync();
-        }
-
-        public async Task<string> GetUserRole(UserDto userDto)
-        {
-            var user = _mapper.Map<User>(userDto);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            return roles[0];
-        }
+        private async Task<string> GetUserRole(User user)
+            => (await _userManager.GetRolesAsync(user))?.FirstOrDefault();
     }
 }

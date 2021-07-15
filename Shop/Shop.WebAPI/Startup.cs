@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -39,6 +41,21 @@ namespace Shop.WebAPI
 
             services.AddSwaggerGen();
 
+            services.AddScoped((serviceProvider) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                return new SmtpClient()
+                {
+                    Host = config.GetValue<string>("Email:Smtp:Host"),
+                    Port = config.GetValue<int>("Email:Smtp:Port"),
+                    Credentials = new NetworkCredential(
+                        config.GetValue<string>("Email:Smtp:Username"),
+                        config.GetValue<string>("Email:Smtp:Password")
+                    ),
+                    EnableSsl = config.GetValue<bool>("Email:Smtp:EnableSsl"),
+                    Timeout = config.GetValue<int>("Email:Smtp:Timeout")
+                };
+            });
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
         }

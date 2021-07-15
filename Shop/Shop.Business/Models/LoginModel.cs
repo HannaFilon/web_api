@@ -4,10 +4,12 @@ namespace Shop.Business.Models
 {
     public class LoginModel
     {
-        [RegularExpression(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$")]
+        [Required(ErrorMessage = "Email is required.")]
+        [RegularExpression(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$", ErrorMessage = "Invalid Email")]
         public string Email { get; set; }
 
-        [RegularExpression(@"(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}")] 
+        [Required(ErrorMessage = "Password is required.")]
+        [RegularExpression(@"(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,}", ErrorMessage = "Invalid Password")]
         public string Password { get; set; }
     }
 }

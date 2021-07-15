@@ -10,7 +10,5 @@ namespace Shop.Business.IServices
         public Task<bool> CheckPassword(string email, string password);
         public Task<UserDto> SignIn(string email, string password);
         public Task<UserDto> GetByEmail(string email);
-        public Task<string> GetUserRole(UserDto userDto);
-        public Task Logout();
     }
 }

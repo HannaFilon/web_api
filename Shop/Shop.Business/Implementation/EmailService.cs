@@ -4,7 +4,6 @@ using Shop.Business.IServices;
 using Shop.Business.Models;
 using Shop.DAL.Core.Entities;
 using System;
-using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
@@ -14,12 +13,14 @@ namespace Shop.Business.Implementation
     {
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
+        private readonly SmtpClient _smtpClient;
 
 
-        public EmailService(UserManager<User> userManager, IMapper mapper)
+        public EmailService(UserManager<User> userManager, IMapper mapper, SmtpClient smtpClient)
         {
             _userManager = userManager;
             _mapper = mapper;
+            _smtpClient = smtpClient;
         }
 
 
@@ -35,34 +36,30 @@ namespace Shop.Business.Implementation
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                throw new Exception();
+            {
+                throw new Exception("User not found");
+            }
 
             if (callback == null)
-                throw new SmtpException("The url is null.");
-
-            var smtp = new SmtpClient
             {
-                Host = "smtp.gmail.com",
-                Port = 587,
-                Credentials = new NetworkCredential("annfilon16", "password"),
-                EnableSsl = true,
-                Timeout = 120000
-            };
+                throw new ArgumentNullException("Url is null.");
+            }
+
             var message = new MailMessage
             {
                 IsBodyHtml = true,
                 Subject = "Email confirmation",
-                Body = "Please confirm your account by clicking this link: "+
-                       "<a href=\"" + callback + "\">link</a>",
+                Body = $"Please confirm your account by clicking this link: <a href=\"{callback}\">link</a>",
                 From = new MailAddress("annfilon16@gmail.com"),
             };
+
             message.To.Add(new MailAddress(email));
-            smtp.Send(message);
+            await _smtpClient.SendMailAsync(message);
         }
 
         public async Task<string> GenerateEmailConfirmationToken(UserDto userDto)
         {
-            var user = await _userManager.FindByEmailAsync(userDto.Email);
+            var user = _mapper.Map<User>(userDto);
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             return code;

@@ -10,5 +10,6 @@ namespace Shop.Business.Models
         public string Role { get; set; }
         public string AddressDelivery { get; set; }
         public string PhoneNumber { get; set; }
+        public string SecurityStamp { get; set; }
     }
 }
