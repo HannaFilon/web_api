@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -5,8 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shop.DAL.Core;
 using Serilog;
+using Shop.DAL.Core;
+using Shop.Business.Implementation;
+using Shop.Business.IServices;
+using Shop.DAL.Core.Entities;
+using Shop.Business;
 
 namespace Shop.WebAPI
 {
@@ -17,24 +23,42 @@ namespace Shop.WebAPI
             Configuration = configuration;
         }
 
+
         public IConfiguration Configuration { get; }
 
- 
+
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<ShopContext>()
+                .AddDefaultTokenProviders();
             services.AddDbContext<ShopContext>(opt =>
-            opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
+                opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ShopContext>();
-
-            services.AddAutoMapper(typeof(Startup));
+           
+            services.AddAutoMapper(typeof(AutoMap));
             services.AddControllersWithViews();
 
             services.AddSwaggerGen();
-        }
 
+            services.AddScoped((serviceProvider) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                return new SmtpClient()
+                {
+                    Host = config.GetValue<string>("Email:Smtp:Host"),
+                    Port = config.GetValue<int>("Email:Smtp:Port"),
+                    Credentials = new NetworkCredential(
+                        config.GetValue<string>("Email:Smtp:Username"),
+                        config.GetValue<string>("Email:Smtp:Password")
+                    ),
+                    EnableSsl = config.GetValue<bool>("Email:Smtp:EnableSsl"),
+                    Timeout = config.GetValue<int>("Email:Smtp:Timeout")
+                };
+            });
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmailService, EmailService>();
+        }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
