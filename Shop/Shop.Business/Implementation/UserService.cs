@@ -85,7 +85,73 @@ namespace Shop.Business.Implementation
             return userDto;
         }
 
+
+        public async Task<UserDto> GetById(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = await GetUserRole(user);
+
+            return userDto;
+        }
+
+        public async Task<UserDto> UpdateUser(string userId, UserModel userModel)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ArgumentNullException("User not found.");
+            }
+
+            if (!string.IsNullOrEmpty(userModel.UserName))
+            {
+                var resultUpdatingName = await _userManager.SetUserNameAsync(user, userModel.UserName);
+                if (!resultUpdatingName.Succeeded)
+                {
+                    throw new Exception("UserName can't be updated.");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(userModel.PhoneNumber))
+            {
+                var resultUpdatingNumber = await _userManager.SetPhoneNumberAsync(user, userModel.PhoneNumber);
+                if (!resultUpdatingNumber.Succeeded)
+                {
+                    throw new Exception("PhoneNumber can't be updated.");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(userModel.AddressDelivery))
+            {
+                user.AddressDelivery = userModel.AddressDelivery;
+                var resultUpdatingAddress = await _userManager.UpdateAsync(user);
+                if (!resultUpdatingAddress.Succeeded)
+                {
+                    throw new Exception("PhoneNumber can't be updated.");
+                }
+            }
+
+            user = await _userManager.FindByIdAsync(userId);
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = await GetUserRole(user);
+
+            return userDto;
+        }
+
         private async Task<string> GetUserRole(User user)
             => (await _userManager.GetRolesAsync(user))?.FirstOrDefault();
+
+        public async Task<IdentityResult> UpdatePassword(string userId, PasswordUpdateModel passwordUpdateModel)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ArgumentNullException("User not found.");
+            }
+
+            var result = await
+                _userManager.ChangePasswordAsync(user, passwordUpdateModel.Password, passwordUpdateModel.NewPassword);
+            return result;
+        }
     }
 }
