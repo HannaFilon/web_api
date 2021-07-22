@@ -18,7 +18,8 @@ namespace Shop.WebAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
-
+        private const string TokenIdKey = "TokenId";
+        private const string JwtKey = "611bd2ba-c254-4a07-9308-27cb74cd5237";
 
         public UserController(IUserService userService, IMapper mapper)
         {
