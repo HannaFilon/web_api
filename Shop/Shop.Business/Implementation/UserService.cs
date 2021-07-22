@@ -103,35 +103,13 @@ namespace Shop.Business.Implementation
                 throw new ArgumentNullException("User not found.");
             }
 
-            if (!string.IsNullOrEmpty(userModel.UserName))
+            _mapper.Map(userModel, user);
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
             {
-                var resultUpdatingName = await _userManager.SetUserNameAsync(user, userModel.UserName);
-                if (!resultUpdatingName.Succeeded)
-                {
-                    throw new Exception("UserName can't be updated.");
-                }
+                throw new Exception("Update failed.");
             }
 
-            if (!string.IsNullOrEmpty(userModel.PhoneNumber))
-            {
-                var resultUpdatingNumber = await _userManager.SetPhoneNumberAsync(user, userModel.PhoneNumber);
-                if (!resultUpdatingNumber.Succeeded)
-                {
-                    throw new Exception("PhoneNumber can't be updated.");
-                }
-            }
-
-            if (!string.IsNullOrEmpty(userModel.AddressDelivery))
-            {
-                user.AddressDelivery = userModel.AddressDelivery;
-                var resultUpdatingAddress = await _userManager.UpdateAsync(user);
-                if (!resultUpdatingAddress.Succeeded)
-                {
-                    throw new Exception("PhoneNumber can't be updated.");
-                }
-            }
-
-            user = await _userManager.FindByIdAsync(userId);
             var userDto = _mapper.Map<UserDto>(user);
             userDto.Role = await GetUserRole(user);
 
