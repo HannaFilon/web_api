@@ -47,6 +47,11 @@ namespace Shop.WebAPI.Controllers
         [HttpPost("password")]
         public async Task<IActionResult> UpdatePassword([FromBody] PasswordUpdateModel passwordUpdateModel)
         {
+            if (!HttpContext.Request.Headers.ContainsKey(TokenIdKey))
+            {
+                return BadRequest("This method is unavailable.");
+            }
+
             var token = HttpContext.Request.Headers["TokenId"];
             var userId = ValidateJwtToken(token);
             if (string.IsNullOrEmpty(userId))
