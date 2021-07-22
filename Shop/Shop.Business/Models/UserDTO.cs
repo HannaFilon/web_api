@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Shop.Business.Models
+﻿namespace Shop.Business.Models
 {
     public class UserDto
     {

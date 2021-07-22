@@ -85,6 +85,50 @@ namespace Shop.Business.Implementation
             return userDto;
         }
 
+
+        public async Task<UserDto> GetById(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = await GetUserRole(user);
+
+            return userDto;
+        }
+
+        public async Task<UserDto> UpdateUser(string userId, UserModel userModel)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ArgumentNullException("User not found.");
+            }
+
+            _mapper.Map(userModel, user);
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                throw new Exception("Update failed.");
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = await GetUserRole(user);
+
+            return userDto;
+        }
+
+        public async Task<IdentityResult> UpdatePassword(string userId, PasswordUpdateModel passwordUpdateModel)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new ArgumentNullException("User not found.");
+            }
+
+            var result = await
+                _userManager.ChangePasswordAsync(user, passwordUpdateModel.Password, passwordUpdateModel.NewPassword);
+            return result;
+        }
+
         private async Task<string> GetUserRole(User user)
             => (await _userManager.GetRolesAsync(user))?.FirstOrDefault();
     }

@@ -22,7 +22,7 @@ namespace Shop.WebAPI
         {
             try
             {
-                await _next.Invoke(context);
+                await _next(context);
             }
             catch (Exception ex)
             {
