@@ -116,9 +116,6 @@ namespace Shop.Business.Implementation
             return userDto;
         }
 
-        private async Task<string> GetUserRole(User user)
-            => (await _userManager.GetRolesAsync(user))?.FirstOrDefault();
-
         public async Task<IdentityResult> UpdatePassword(string userId, PasswordUpdateModel passwordUpdateModel)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -131,5 +128,8 @@ namespace Shop.Business.Implementation
                 _userManager.ChangePasswordAsync(user, passwordUpdateModel.Password, passwordUpdateModel.NewPassword);
             return result;
         }
+
+        private async Task<string> GetUserRole(User user)
+            => (await _userManager.GetRolesAsync(user))?.FirstOrDefault();
     }
 }

@@ -31,7 +31,12 @@ namespace Shop.WebAPI.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserModel userModel)
         {
-            var token = HttpContext.Request.Headers["TokenId"];
+            if (!HttpContext.Request.Headers.ContainsKey(TokenIdKey))
+            {
+                return BadRequest("This method is unavailable.");
+            }
+
+            var token = HttpContext.Request.Headers[TokenIdKey];
             var userId = ValidateJwtToken(token);
             if (string.IsNullOrEmpty(userId))
             {
@@ -52,7 +57,7 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("This method is unavailable.");
             }
 
-            var token = HttpContext.Request.Headers["TokenId"];
+            var token = HttpContext.Request.Headers[TokenIdKey];
             var userId = ValidateJwtToken(token);
             if (string.IsNullOrEmpty(userId))
             {
@@ -71,7 +76,12 @@ namespace Shop.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserInfo()
         {
-            var token = HttpContext.Request.Headers["TokenId"];
+            if (!HttpContext.Request.Headers.ContainsKey(TokenIdKey))
+            {
+                return BadRequest("This method is unavailable.");
+            }
+
+            var token = HttpContext.Request.Headers[TokenIdKey];
             var userId = ValidateJwtToken(token);
             if (string.IsNullOrEmpty(userId))
             {
@@ -94,7 +104,6 @@ namespace Shop.WebAPI.Controllers
             if (string.IsNullOrWhiteSpace(token))
                 throw new SecurityTokenException("Invalid token");
 
-            var key = "611bd2ba-c254-4a07-9308-27cb74cd5237";
             try
             {
 
@@ -105,7 +114,7 @@ namespace Shop.WebAPI.Controllers
                             ValidateIssuer = false,
                             ValidateAudience = false,
                             ValidateIssuerSigningKey = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey)),
                         },
                         out var validatedToken);
 
