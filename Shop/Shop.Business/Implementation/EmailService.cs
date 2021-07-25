@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Shop.Business.IServices;
-using Shop.Business.Models;
 using Shop.DAL.Core.Entities;
 using System;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Shop.Business.ModelsDto;
 
 namespace Shop.Business.Implementation
 {

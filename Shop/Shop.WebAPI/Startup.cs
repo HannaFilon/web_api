@@ -13,6 +13,8 @@ using Shop.Business.Implementation;
 using Shop.Business.IServices;
 using Shop.DAL.Core.Entities;
 using Shop.Business;
+using Shop.DAL.Core.Repositories.Implementation;
+using Shop.DAL.Core.Repositories.Interfaces;
 
 namespace Shop.WebAPI
 {
@@ -58,6 +60,11 @@ namespace Shop.WebAPI
             });
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IProductService, ProductService>();
+
+            services
+                .AddScoped(typeof(IRepository<>), typeof(Repository<>))
+                .AddScoped<IProductRepository, ProductRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

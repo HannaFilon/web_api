@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Shop.Business.Models;
+using Shop.Business.ModelsDto;
 using System.Threading.Tasks;
 
 namespace Shop.Business.IServices

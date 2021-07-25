@@ -1,5 +1,7 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using AutoMapper;
 using Shop.Business.Models;
+using Shop.Business.ModelsDto;
 using Shop.DAL.Core.Entities;
 
 namespace Shop.Business
@@ -17,6 +19,8 @@ namespace Shop.Business
                     (source, destination) => !string.IsNullOrEmpty(source.AddressDelivery) ? source.AddressDelivery : destination.AddressDelivery))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(
                     (source, destination) => !string.IsNullOrEmpty(source.PhoneNumber) ? source.PhoneNumber : destination.PhoneNumber));
+            CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<List<int>, List<PlatformTypeEnum>>();
         }
     }
 }

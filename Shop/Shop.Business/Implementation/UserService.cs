@@ -6,6 +6,7 @@ using Shop.DAL.Core.Entities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Shop.Business.ModelsDto;
 
 namespace Shop.Business.Implementation
 {
