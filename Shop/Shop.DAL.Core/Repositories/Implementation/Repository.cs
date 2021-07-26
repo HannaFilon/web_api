@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Shop.DAL.Core.Repositories.Interfaces;
@@ -27,7 +26,7 @@ namespace Shop.DAL.Core.Repositories.Implementation
             return entity;
         }
 
-        public virtual async Task<IEnumerable<TEntity>> GetAll()
+        public async Task<IEnumerable<TEntity>> GetAll()
         {
             var entityList = await _dbSet.AsNoTracking().ToListAsync();
             return entityList;

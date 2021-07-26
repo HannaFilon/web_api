@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Shop.Business.IServices;
 
@@ -15,33 +12,56 @@ namespace Shop.WebAPI.Controllers
     public class GamesController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly IMapper _mapper;
 
 
-        public GamesController(IMapper mapper, IProductService productService)
+        public GamesController( IProductService productService)
         {
             _productService = productService;
-            _mapper = mapper;
         }
 
 
         [AllowAnonymous]
         [HttpGet("topPlatforms")]
-        public IActionResult GetTopPlatforms()
+        public async Task<IActionResult> GetTopPlatforms()
         {
-            var topPlatforms = _productService.GetTopPlatforms();
+            var topPlatforms = await _productService.GetTopPlatforms();
+            if (topPlatforms.Any())
+            {
+                return Ok(topPlatforms);
+            }
 
-            return Ok(topPlatforms);
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                "Error retrieving data from the database");
         }
 
         [AllowAnonymous]
         [HttpGet("search")]
-        public async Task<IActionResult> GetGamesByName(string name, string limitString)
+        public async Task<IActionResult> SearchByName(string term, string limitString)
         {
-            var limit = Convert.ToInt32(limitString);
-            var gamesList = await _productService.GetByName(name, limit);
+            if (string.IsNullOrEmpty(term))
+            {
+                return BadRequest("No search parameters given.");
+            }
 
-            return Ok(gamesList);
+            if (string.IsNullOrEmpty(limitString))
+            {
+                return BadRequest("No limit parameters given.");
+            }
+
+            var resultTryParse = int.TryParse(limitString, out int limit);
+            if (!resultTryParse)
+            {
+                limit = 7;
+            }
+
+            var gamesList = await _productService.GetByName(term, limit);
+            if (gamesList.Any())
+            {
+                return Ok(gamesList);
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                "Error retrieving data from the database");
         }
     }
 }

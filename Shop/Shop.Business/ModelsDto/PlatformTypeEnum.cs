@@ -1,14 +1,11 @@
-﻿using System;
-
-namespace Shop.Business.ModelsDto
+﻿namespace Shop.Business.ModelsDto
 {
-    [Flags]
     public enum PlatformTypeEnum : short
     {
-        PC = 1,
-        XBox = 2,
-        PlayStation = 4,
-        Phone = 8,
-        Switch = 16
+        PC = 0,
+        XBox = 1,
+        PlayStation = 2,
+        Phone = 3,
+        Switch = 4
     }
 }

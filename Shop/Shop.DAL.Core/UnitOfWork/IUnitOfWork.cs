@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Shop.DAL.Core.Entities;
 using Shop.DAL.Core.Repositories.Interfaces;
 
