@@ -24,25 +24,23 @@ namespace Shop.Business.Implementation
         {
             var result = _unitOfWork.ProductRepository.Get()
                 .GroupBy(p => p.Platform)
-                .OrderByDescending(g => g.Count()).Take(3)
-                .Select(l => new { Platform = l.Key, Date = l.Select(p => p.DateCreated) })
+                .OrderByDescending(g => g.Count())
+                .Take(3)
+                .Select(l => new {Platform = l.Key, Date = l.Select(p => p.DateCreated).Max()})
                 .OrderBy(l => l.Date);
-            var platformsList = new List<int>(); 
+            var platformsList = new List<int>();
             platformsList.AddRange(await result.Select(l=>l.Platform).ToArrayAsync());
-            
-
-            platformsList.Reverse();
             var topPlatforms = _mapper.Map<List<PlatformTypeEnum>>(platformsList);
-
+            
             return topPlatforms;
         }
 
         public async Task<List<ProductDto>> GetByName(string name, int limit)
         {
             var gamesList = await _unitOfWork.ProductRepository.Get()
-                .Where(x => x.Name == name).Take(limit).AsNoTracking().ToListAsync();
+                .Where(x => x.Name == name).Take(limit).ToListAsync();
             var gamesDtoList = _mapper.Map<List<ProductDto>>(gamesList);
-
+            
             return gamesDtoList;
         }
     }

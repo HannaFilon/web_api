@@ -8,6 +8,4 @@ namespace Shop.DAL.Core.Repositories.Implementation
         {
         }
     }
-
-
 }
