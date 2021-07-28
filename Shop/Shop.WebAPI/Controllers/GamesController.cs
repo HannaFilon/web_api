@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -15,12 +12,10 @@ namespace Shop.WebAPI.Controllers
     {
         private readonly IProductService _productService;
 
-
         public GamesController( IProductService productService)
         {
             _productService = productService;
         }
-
 
         [AllowAnonymous]
         [HttpGet("topPlatforms")]
@@ -36,8 +31,8 @@ namespace Shop.WebAPI.Controllers
                 return Ok(topPlatforms);
             }
 
-            return StatusCode(StatusCodes.Status500InternalServerError, 
-                "Error retrieving data from the database");
+            return StatusCode(404, 
+                "No popular game platforms found.");
         }
 
         [AllowAnonymous]
@@ -66,8 +61,8 @@ namespace Shop.WebAPI.Controllers
                 return Ok(gamesList);
             }
 
-            return StatusCode(StatusCodes.Status500InternalServerError, 
-                "Error retrieving data from the database");
+            return StatusCode(400, 
+                $"No games with name {term} found.");
         }
     }
 }

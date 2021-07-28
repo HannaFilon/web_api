@@ -15,14 +15,12 @@ namespace Shop.Business.Implementation
         private readonly IMapper _mapper;
         private readonly SmtpClient _smtpClient;
 
-
         public EmailService(UserManager<User> userManager, IMapper mapper, SmtpClient smtpClient)
         {
             _userManager = userManager;
             _mapper = mapper;
             _smtpClient = smtpClient;
         }
-
 
         public async Task<IdentityResult> ConfirmEmail(string email, string code)
         {

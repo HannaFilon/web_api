@@ -12,13 +12,11 @@ namespace Shop.DAL.Core.Repositories.Implementation
         protected readonly ShopContext _context;
         protected readonly DbSet<TEntity> _dbSet;
 
-
         public Repository(ShopContext context)
         {
             _context = context;
             _dbSet = context.Set<TEntity>();
         }
-
 
         public async Task<TEntity> GetByID(Guid id)
         {

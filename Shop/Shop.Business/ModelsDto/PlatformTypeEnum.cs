@@ -1,6 +1,6 @@
 ﻿namespace Shop.Business.ModelsDto
 {
-    public enum PlatformTypeEnum : int
+    public enum PlatformTypeEnum
     {
         PC = 0,
         XBox = 1,

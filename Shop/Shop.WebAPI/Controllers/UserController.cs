@@ -27,7 +27,6 @@ namespace Shop.WebAPI.Controllers
             _mapper = mapper;
         }
 
-
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserModel userModel)
         {

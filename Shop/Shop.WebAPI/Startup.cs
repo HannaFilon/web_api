@@ -26,9 +26,7 @@ namespace Shop.WebAPI
             Configuration = configuration;
         }
 
-
         public IConfiguration Configuration { get; }
-
 
         public void ConfigureServices(IServiceCollection services)
         {

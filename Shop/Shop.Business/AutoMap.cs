@@ -1,6 +1,4 @@
-﻿using System;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore.Query.Internal;
+﻿using AutoMapper;
 using Shop.Business.Models;
 using Shop.Business.ModelsDto;
 using Shop.DAL.Core.Entities;
@@ -35,8 +33,6 @@ namespace Shop.Business
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(
                     (source, destination) => !string.IsNullOrEmpty(source.DateCreated.ToShortDateString()) ? source.DateCreated : destination.DateCreated))
                 .ForMember(dest => dest.TotalRating, opt => opt.MapFrom(source => source.TotalRating));
-
-
         }
     }
 }

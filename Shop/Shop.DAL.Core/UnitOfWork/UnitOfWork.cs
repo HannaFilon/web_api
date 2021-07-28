@@ -10,13 +10,11 @@ namespace Shop.DAL.Core.UnitOfWork
         private readonly ShopContext _context;
         private readonly IRepository<Product> _productRepository;
 
-        
         public UnitOfWork(ShopContext context, IRepository<Product> productsRepository) 
         {
             _context = context;
             _productRepository = productsRepository;
         }
-
 
         public IRepository<Product> ProductRepository => _productRepository;
 
