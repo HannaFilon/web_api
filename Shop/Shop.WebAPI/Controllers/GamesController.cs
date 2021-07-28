@@ -26,17 +26,14 @@ namespace Shop.WebAPI.Controllers
         [HttpGet("topPlatforms")]
         public async Task<IActionResult> GetTopPlatforms()
         {
-            var topPlatforms = await _productService.GetTopPlatforms();
-            var topPlatformsStrList = new List<string>();
-            foreach (var item in topPlatforms)
-            {
-                topPlatformsStrList.Add(item.ToString());
-            }
+            var topPlatforms = (await _productService.GetTopPlatforms())
+                .Select(p => p.ToString())
+                .Reverse()
+                .ToList();
 
-            topPlatformsStrList.Reverse();
-            if (topPlatformsStrList.Any())
+            if (topPlatforms.Any())
             {
-                return Ok(topPlatformsStrList);
+                return Ok(topPlatforms);
             }
 
             return StatusCode(StatusCodes.Status500InternalServerError, 
