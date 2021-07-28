@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Shop.Business.IServices;
-using Shop.Business.Models;
 using Shop.DAL.Core.Entities;
 using System;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Shop.Business.ModelsDto;
 
 namespace Shop.Business.Implementation
 {
@@ -15,14 +15,12 @@ namespace Shop.Business.Implementation
         private readonly IMapper _mapper;
         private readonly SmtpClient _smtpClient;
 
-
         public EmailService(UserManager<User> userManager, IMapper mapper, SmtpClient smtpClient)
         {
             _userManager = userManager;
             _mapper = mapper;
             _smtpClient = smtpClient;
         }
-
 
         public async Task<IdentityResult> ConfirmEmail(string email, string code)
         {

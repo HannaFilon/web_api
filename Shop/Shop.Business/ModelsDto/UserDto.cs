@@ -1,4 +1,4 @@
-﻿namespace Shop.Business.Models
+﻿namespace Shop.Business.ModelsDto
 {
     public class UserDto
     {

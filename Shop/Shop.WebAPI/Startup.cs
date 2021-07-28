@@ -13,6 +13,9 @@ using Shop.Business.Implementation;
 using Shop.Business.IServices;
 using Shop.DAL.Core.Entities;
 using Shop.Business;
+using Shop.DAL.Core.Repositories.Implementation;
+using Shop.DAL.Core.Repositories.Interfaces;
+using Shop.DAL.Core.UnitOfWork;
 
 namespace Shop.WebAPI
 {
@@ -23,9 +26,7 @@ namespace Shop.WebAPI
             Configuration = configuration;
         }
 
-
         public IConfiguration Configuration { get; }
-
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -35,7 +36,7 @@ namespace Shop.WebAPI
             services.AddDbContext<ShopContext>(opt =>
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
-           
+
             services.AddAutoMapper(typeof(AutoMap));
             services.AddControllersWithViews();
 
@@ -58,6 +59,10 @@ namespace Shop.WebAPI
             });
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IProductService, ProductService>();
+
+            services.AddScoped<IUnitOfWork,UnitOfWork>();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

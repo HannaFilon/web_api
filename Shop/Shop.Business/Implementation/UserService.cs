@@ -6,6 +6,7 @@ using Shop.DAL.Core.Entities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Shop.Business.ModelsDto;
 
 namespace Shop.Business.Implementation
 {
@@ -15,14 +16,12 @@ namespace Shop.Business.Implementation
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
 
-
         public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
         }
-
 
         public async Task<IdentityResult> SignUp(string email, string password)
         {
@@ -84,7 +83,6 @@ namespace Shop.Business.Implementation
 
             return userDto;
         }
-
 
         public async Task<UserDto> GetById(string userId)
         {
