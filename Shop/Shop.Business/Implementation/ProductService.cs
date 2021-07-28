@@ -22,14 +22,13 @@ namespace Shop.Business.Implementation
 
         public async Task<List<PlatformTypeEnum>> GetTopPlatforms()
         {
-            var result = _unitOfWork.ProductRepository.Get()
+            var platformsList = await _unitOfWork.ProductRepository.Get()
                 .GroupBy(p => p.Platform)
                 .OrderByDescending(g => g.Count())
                 .Take(3)
-                .Select(l => new {Platform = l.Key, Date = l.Select(p => p.DateCreated).Max()})
-                .OrderBy(l => l.Date);
-            var platformsList = new List<int>();
-            platformsList.AddRange(await result.Select(l=>l.Platform).ToArrayAsync());
+                .Select(l => new { Platform = l.Key, Date = l.Select(p => p.DateCreated).Max() })
+                .OrderBy(l => l.Date)
+                .ToArrayAsync();
             var topPlatforms = _mapper.Map<List<PlatformTypeEnum>>(platformsList);
             
             return topPlatforms;
