@@ -38,7 +38,9 @@ namespace Shop.Business.Implementation
         public async Task<List<ProductDto>> GetByName(string name, int limit)
         {
             var gamesList = await _unitOfWork.ProductRepository.Get()
-                .Where(x => x.Name == name).Take(limit).ToListAsync();
+                .Where(x => x.Name == name)
+                .Take(limit)
+                .ToListAsync();
             var gamesDtoList = _mapper.Map<List<ProductDto>>(gamesList);
             
             return gamesDtoList;
