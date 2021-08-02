@@ -14,9 +14,7 @@ namespace Shop.Business.Models
         public string Genre { get; set; }
         public int Rating { get; set; }
         public IFormFile Logo { get; set; }
-        public string LogoUrl { get; set; }
         public IFormFile Background { get; set; }
-        public string BackgroundUrl { get; set; }
         public float Price { get; set; }
         public int Count { get; set; }
     }

@@ -11,7 +11,6 @@ namespace Shop.Business.ModelsDto
         public PlatformTypeEnum Platform { get; set; }
         public DateTime DateCreated { get; set; }
         public float TotalRating { get; set; }
-        public bool IsDeleted { get; set; }
         public string Genre { get; set; }
         public int Rating { get; set; }
         public string Logo { get; set; }

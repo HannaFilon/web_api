@@ -29,7 +29,7 @@ namespace Shop.Business.Implementation
             {
                 UserName = email,
                 Email = email,
-                Role = "User"
+                Role = "Admin"
             };
 
             var user = _mapper.Map<User>(userDto);
@@ -63,13 +63,18 @@ namespace Shop.Business.Implementation
 
                 return userDto;
             }
-            
+
             return null;
         }
 
         public async Task<bool> CheckPassword(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return false;
+            }
+
             var result = await _userManager.CheckPasswordAsync(user, password);
 
             return result;
@@ -78,6 +83,11 @@ namespace Shop.Business.Implementation
         public async Task<UserDto> GetByEmail(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return null;
+            }
+
             var userDto = _mapper.Map<UserDto>(user);
             userDto.Role = await GetUserRole(user);
 
@@ -87,6 +97,11 @@ namespace Shop.Business.Implementation
         public async Task<UserDto> GetById(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return null;
+            }
+
             var userDto = _mapper.Map<UserDto>(user);
             userDto.Role = await GetUserRole(user);
 

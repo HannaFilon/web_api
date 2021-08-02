@@ -21,12 +21,14 @@ namespace Shop.DAL.Core.Repositories.Implementation
         public async Task<TEntity> GetByID(Guid id)
         {
             var obj = await _dbSet.FindAsync(id);
+
             return obj;
         }
 
         public async Task<IEnumerable<TEntity>> GetAll()
         {
             var objList = await _dbSet.AsNoTracking().ToListAsync();
+
             return objList;
         }
 

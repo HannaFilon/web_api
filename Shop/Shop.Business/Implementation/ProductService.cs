@@ -90,13 +90,13 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> UpdateProduct(StuffModel stuffModel)
         {
-            var product = _mapper.Map<Product>(stuffModel);
-            var productId = await _unitOfWork.ProductRepository.GetByID(product.Id);
-            if (productId == null)
+            var product = await _unitOfWork.ProductRepository.Get().Where(p => !p.IsDeleted).Where(p => p.Id == stuffModel.Id).SingleOrDefaultAsync();
+            if (product == null)
             {
                 throw new Exception("Game not found.");
             }
 
+            _mapper.Map(stuffModel, product);
             await SaveImages(stuffModel, product);
             product.IsDeleted = false;
             _unitOfWork.ProductRepository.Update(product);

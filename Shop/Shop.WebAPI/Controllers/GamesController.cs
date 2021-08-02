@@ -1,19 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Net;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Shop.Business.IServices;
 using Shop.Business.Models;
-using Shop.Business.ModelsDto;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using Microsoft.AspNetCore.Http;
 
 namespace Shop.WebAPI.Controllers
 {
@@ -39,13 +31,13 @@ namespace Shop.WebAPI.Controllers
                 .Reverse()
                 .ToList();
 
-            if (topPlatforms.Any())
+            if (!topPlatforms.Any())
             {
-                return Ok(topPlatforms);
+                return StatusCode(404,
+                    "No popular game platforms found.");
             }
-
-            return StatusCode(404,
-                "No popular game platforms found.");
+            
+            return Ok(topPlatforms);
         }
 
         [AllowAnonymous]
@@ -69,13 +61,13 @@ namespace Shop.WebAPI.Controllers
             }
 
             var gamesList = await _productService.GetByName(term, limitNumber);
-            if (gamesList.Any())
+            if (!gamesList.Any())
             {
-                return Ok(gamesList);
+                return StatusCode(400,
+                    $"No games with name {term} found.");
             }
 
-            return StatusCode(400,
-                $"No games with name {term} found.");
+            return Ok(gamesList);
         }
 
         [AllowAnonymous]
@@ -111,9 +103,9 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("Product can't be created.");
             }
 
-            stuffModel = _mapper.Map<StuffModel>(productDto);
+            var responseStuffModel = _mapper.Map<ResponseStuffModel>(productDto);
 
-            return StatusCode(201, stuffModel);
+            return StatusCode(201, responseStuffModel);
         }
 
 
@@ -132,9 +124,9 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("Product can't be updated.");
             }
 
-            stuffModel = _mapper.Map<StuffModel>(productDto);
+            var responseStuffModel = _mapper.Map<ResponseStuffModel>(productDto);
 
-            return Ok(stuffModel);
+            return Ok(responseStuffModel);
         }
 
         [Authorize(Roles = "Admin")]
