@@ -30,5 +30,19 @@ namespace Shop.DAL.Core.Entities
         [Range(0, 5, ErrorMessage = "Value for {0} must be between {1} and {2}")]
         public float TotalRating { get; set; }
 
+        [Required]
+        public bool IsDeleted { get; set; }
+
+        public string Genre { get; set; }
+
+        public int Rating { get; set; }
+
+        public string Logo { get; set; }
+
+        public string Background { get; set; }
+        
+        public float Price { get; set; }
+
+        public int Count { get; set; }
     }
 }

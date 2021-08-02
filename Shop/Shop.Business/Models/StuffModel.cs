@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
+using Shop.Business.ModelsDto;
 
-namespace Shop.Business.ModelsDto
+namespace Shop.Business.Models
 {
-    public class ProductDto
+    public class StuffModel
     {
-        [JsonIgnore]
         public Guid Id { get; set; }
         public string Name { get; set; }
         public PlatformTypeEnum Platform { get; set; }
         public DateTime DateCreated { get; set; }
         public float TotalRating { get; set; }
-        public bool IsDeleted { get; set; }
         public string Genre { get; set; }
         public int Rating { get; set; }
-        public string Logo { get; set; }
-        public string Background { get; set; }
+        public IFormFile Logo { get; set; }
+        public string LogoUrl { get; set; }
+        public IFormFile Background { get; set; }
+        public string BackgroundUrl { get; set; }
         public float Price { get; set; }
         public int Count { get; set; }
     }

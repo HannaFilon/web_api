@@ -43,7 +43,7 @@ namespace Shop.WebAPI.Controllers
             }
 
             var userDto = await _userService.UpdateUser(userId, userModel);
-            userModel = _mapper.Map<UserModel>(userDto);
+            _mapper.Map(userDto, userModel);
 
             return Ok(userModel);
         }

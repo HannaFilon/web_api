@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Shop.DAL.Core.Entities;
 using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace Shop.DAL.Core
 {
