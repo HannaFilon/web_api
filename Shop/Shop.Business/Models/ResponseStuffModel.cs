@@ -12,8 +12,8 @@ namespace Shop.Business.Models
         public float TotalRating { get; set; }
         public string Genre { get; set; }
         public int Rating { get; set; }
-        public string LogoUrl { get; set; }
-        public string BackgroundUrl { get; set; }
+        public string Logo { get; set; }
+        public string Background { get; set; }
         public float Price { get; set; }
         public int Count { get; set; }
     }
