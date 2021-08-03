@@ -65,13 +65,15 @@ namespace Shop.WebAPI
                     config.GetValue<string>("Cloudinary:Account:Cloud"),
                     config.GetValue<string>("Cloudinary:Account:ApiKey"),
                     config.GetValue<string>("Cloudinary:Account:ApiSecret"));
-                return new Cloudinary(account);
+                var cloudinary = new Cloudinary(account);
+                cloudinary.Api.Secure = true;
+                return cloudinary;
             });
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IProductService, ProductService>();
 
-            services.AddScoped<IUnitOfWork,UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         }
 

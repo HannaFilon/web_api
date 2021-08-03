@@ -18,21 +18,21 @@ namespace Shop.DAL.Core.Repositories.Implementation
             _dbSet = context.Set<TEntity>();
         }
 
-        public async Task<TEntity> GetByID(Guid id)
+        public virtual async Task<TEntity> GetByID(Guid id)
         {
             var obj = await _dbSet.FindAsync(id);
 
             return obj;
         }
 
-        public async Task<IEnumerable<TEntity>> GetAll()
+        public virtual async Task<IEnumerable<TEntity>> GetAll()
         {
             var objList = await _dbSet.AsNoTracking().ToListAsync();
 
             return objList;
         }
 
-        public IQueryable<TEntity> Get()
+        public virtual IQueryable<TEntity> Get()
         {
             return _dbSet.AsNoTracking();
         }

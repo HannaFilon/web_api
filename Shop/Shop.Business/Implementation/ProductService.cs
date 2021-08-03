@@ -26,13 +26,11 @@ namespace Shop.Business.Implementation
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _cloudinary = cloudinary;
-            _cloudinary.Api.Secure = true;
         }
 
         public async Task<List<PlatformTypeEnum>> GetTopPlatforms()
         {
             var platformsList = await _unitOfWork.ProductRepository.Get()
-                .Where(p => p.IsDeleted == false)
                 .GroupBy(p => p.Platform)
                 .OrderByDescending(g => g.Count())
                 .Take(3)
@@ -48,7 +46,6 @@ namespace Shop.Business.Implementation
         public async Task<List<ProductDto>> GetByName(string name, int limit)
         {
             var gamesList = await _unitOfWork.ProductRepository.Get()
-                .Where(p => p.IsDeleted == false)
                 .Where(p => p.Name == name)
                 .Take(limit)
                 .ToListAsync();
@@ -65,11 +62,6 @@ namespace Shop.Business.Implementation
                 throw new Exception("Game not found.");
             }
 
-            if (product.IsDeleted)
-            {
-                throw new Exception("Game not found.");
-            }
-
             var productDto = _mapper.Map<ProductDto>(product);
 
             return productDto;
@@ -79,8 +71,6 @@ namespace Shop.Business.Implementation
         {
             var product = _mapper.Map<Product>(stuffModel);
             await SaveImages(stuffModel, product);
-
-            product.IsDeleted = false;
             await _unitOfWork.ProductRepository.Add(product);
             await _unitOfWork.SaveChanges();
             var productDto = _mapper.Map<ProductDto>(product);
@@ -90,7 +80,7 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> UpdateProduct(StuffModel stuffModel)
         {
-            var product = await _unitOfWork.ProductRepository.Get().Where(p => !p.IsDeleted).Where(p => p.Id == stuffModel.Id).SingleOrDefaultAsync();
+            var product = await _unitOfWork.ProductRepository.Get().Where(p => p.Id == stuffModel.Id).SingleOrDefaultAsync();
             if (product == null)
             {
                 throw new Exception("Game not found.");
@@ -98,7 +88,6 @@ namespace Shop.Business.Implementation
 
             _mapper.Map(stuffModel, product);
             await SaveImages(stuffModel, product);
-            product.IsDeleted = false;
             _unitOfWork.ProductRepository.Update(product);
             await _unitOfWork.SaveChanges();
             var productDto = _mapper.Map<ProductDto>(product);
@@ -112,11 +101,6 @@ namespace Shop.Business.Implementation
             if (product == null)
             {
                 throw new Exception("Game not found.");
-            }
-
-            if (product.IsDeleted)
-            {
-                throw new Exception("Game is already deleted.");
             }
 
             product.IsDeleted = true;
