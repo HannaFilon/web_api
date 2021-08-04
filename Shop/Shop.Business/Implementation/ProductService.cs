@@ -111,54 +111,40 @@ namespace Shop.Business.Implementation
 
         private async Task SaveImages(StuffModel stuffModel, Product product)
         {
-            if (stuffModel.Logo is { Length: > 0 })
+            var saveLogoImageTask = SaveImage(stuffModel.Logo, "Images/Logo");
+            var saveBackgroundImageTask = SaveImage(stuffModel.Background, "Images/Background");
+
+            await Task.WhenAll(saveLogoImageTask, saveBackgroundImageTask);
+
+            product.Logo = saveLogoImageTask.Result;
+            product.Background = saveBackgroundImageTask.Result;
+        }
+
+        private async Task<string> SaveImage(IFormFile imageFile, string folder)
+        {
+            string imageUrl = null;
+
+            if (imageFile == null || imageFile.Length == 0)
             {
-                byte[] fileStream = null;
-                await using (var ms = new MemoryStream())
-                {
-                    await stuffModel.Logo.CopyToAsync(ms);
-                    fileStream = ms.ToArray();
-                }
-
-                ImageUploadResult result = null;
-                await using (var ms = new MemoryStream(fileStream))
-                {
-                    ImageUploadParams uploadParams = new ImageUploadParams
-                    {
-                        Folder = "Images/Logo",
-                        File = new FileDescription(stuffModel.Logo.FileName, ms),
-                    };
-
-                    result = await _cloudinary.UploadAsync(uploadParams);
-                }
-
-                var logoUrl = result.Url.AbsoluteUri;
-                product.Logo = logoUrl;
+                return imageUrl;
             }
 
-            if (stuffModel.Background is { Length: > 0 })
+            using (var ms = new MemoryStream())
             {
-                byte[] fileStream = null;
-                await using (var ms = new MemoryStream())
+                await imageFile.CopyToAsync(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var uploadParams = new ImageUploadParams
                 {
-                    await stuffModel.Background.CopyToAsync(ms);
-                    fileStream = ms.ToArray();
-                }
+                    Folder = folder,
+                    File = new FileDescription(imageFile.FileName, ms),
+                };
 
-                ImageUploadResult result = null;
-                await using (var ms = new MemoryStream(fileStream))
-                {
-                    ImageUploadParams uploadParams = new ImageUploadParams
-                    {
-                        Folder = "Images/Background",
-                        File = new FileDescription(stuffModel.Background.FileName, ms),
-                    };
-
-                    result = await _cloudinary.UploadAsync(uploadParams);
-                }
-
-                product.Background = result.Url.AbsoluteUri;
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                imageUrl = uploadResult.Url?.AbsoluteUri;
             }
+
+            return imageUrl;
         }
     }
 }
