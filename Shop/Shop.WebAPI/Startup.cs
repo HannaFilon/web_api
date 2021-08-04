@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Mail;
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -57,11 +58,22 @@ namespace Shop.WebAPI
                     Timeout = config.GetValue<int>("Email:Smtp:Timeout")
                 };
             });
+            services.AddScoped((serviceProvider) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                Account account = new Account(
+                    config.GetValue<string>("Cloudinary:Account:Cloud"),
+                    config.GetValue<string>("Cloudinary:Account:ApiKey"),
+                    config.GetValue<string>("Cloudinary:Account:ApiSecret"));
+                var cloudinary = new Cloudinary(account);
+                cloudinary.Api.Secure = true;
+                return cloudinary;
+            });
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IProductService, ProductService>();
 
-            services.AddScoped<IUnitOfWork,UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         }
 

@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Shop.Business.IServices;
+using Shop.Business.Models;
 
 namespace Shop.WebAPI.Controllers
 {
@@ -11,10 +14,12 @@ namespace Shop.WebAPI.Controllers
     public class GamesController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly IMapper _mapper;
 
-        public GamesController( IProductService productService)
+        public GamesController(IProductService productService, IMapper mapper)
         {
             _productService = productService;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -26,13 +31,13 @@ namespace Shop.WebAPI.Controllers
                 .Reverse()
                 .ToList();
 
-            if (topPlatforms.Any())
+            if (!topPlatforms.Any())
             {
-                return Ok(topPlatforms);
+                return StatusCode(404,
+                    "No popular game platforms found.");
             }
-
-            return StatusCode(404, 
-                "No popular game platforms found.");
+            
+            return Ok(topPlatforms);
         }
 
         [AllowAnonymous]
@@ -56,13 +61,81 @@ namespace Shop.WebAPI.Controllers
             }
 
             var gamesList = await _productService.GetByName(term, limitNumber);
-            if (gamesList.Any())
+            if (!gamesList.Any())
             {
-                return Ok(gamesList);
+                return StatusCode(400,
+                    $"No games with name {term} found.");
             }
 
-            return StatusCode(400, 
-                $"No games with name {term} found.");
+            return Ok(gamesList);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("id")]
+        public async Task<IActionResult> GetProductInfo(Guid productId)
+        {
+            if (string.IsNullOrEmpty(productId.ToString()))
+            {
+                return BadRequest("Bad query parameters.");
+            }
+
+            var productDto = await _productService.GetProductInfo(productId);
+            if (productDto == null)
+            {
+                return BadRequest("Game not found.");
+            }
+
+            return Ok(productDto);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromForm] StuffModel stuffModel)
+        {
+            if (stuffModel == null)
+            {
+                return BadRequest("Not enough info to create a product.");
+            }
+            
+            var productDto = await _productService.CreateProduct(stuffModel);
+            if (productDto == null)
+            {
+                return BadRequest("Product can't be created.");
+            }
+
+            var responseStuffModel = _mapper.Map<ResponseStuffModel>(productDto);
+
+            return StatusCode(201, responseStuffModel);
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateProduct([FromForm] StuffModel stuffModel)
+        {
+            if (stuffModel == null)
+            {
+                return BadRequest("No info to update.");
+            }
+
+            var productDto = await _productService.UpdateProduct(stuffModel);
+            if (productDto == null)
+            {
+                return BadRequest("Product can't be updated.");
+            }
+
+            var responseStuffModel = _mapper.Map<ResponseStuffModel>(productDto);
+
+            return Ok(responseStuffModel);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("id")]
+        public async Task<IActionResult> DeleteProduct(Guid productId)
+        {
+            await _productService.SoftDeleteProduct(productId);
+
+            return StatusCode(204);
         }
     }
 }

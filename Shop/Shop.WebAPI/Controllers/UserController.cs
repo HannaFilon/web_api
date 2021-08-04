@@ -43,7 +43,7 @@ namespace Shop.WebAPI.Controllers
             }
 
             var userDto = await _userService.UpdateUser(userId, userModel);
-            userModel = _mapper.Map<UserModel>(userDto);
+            _mapper.Map(userDto, userModel);
 
             return Ok(userModel);
         }
@@ -98,7 +98,7 @@ namespace Shop.WebAPI.Controllers
             return Ok(userModel);
         }
 
-        public string ValidateJwtToken(string token)
+        private string ValidateJwtToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw new SecurityTokenException("Invalid token");

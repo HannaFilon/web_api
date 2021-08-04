@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Text.Json.Serialization;
+using Shop.Business.ModelsDto;
 
-namespace Shop.Business.ModelsDto
+namespace Shop.Business.Models
 {
-    public class ProductDto
+    public class ResponseStuffModel
     {
-        [JsonIgnore]
         public Guid Id { get; set; }
         public string Name { get; set; }
         public PlatformTypeEnum Platform { get; set; }
