@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using Shop.Business.Models;
 using Shop.Business.ModelsDto;
 using System.Threading.Tasks;

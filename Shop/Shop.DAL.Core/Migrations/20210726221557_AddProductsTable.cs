@@ -15,7 +15,7 @@ namespace Shop.DAL.Core.Migrations
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Platform = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "Date", nullable: false),
-                    TotalRating = table.Column<float>(type: "real", nullable: false)
+                    TotalRating = table.Column<float>(type: "real", nullable: true)
                 },
                 constraints: table =>
                 {

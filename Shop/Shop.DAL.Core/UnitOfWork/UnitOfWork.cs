@@ -8,15 +8,16 @@ namespace Shop.DAL.Core.UnitOfWork
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ShopContext _context;
-        private readonly IRepository<Product> _productRepository;
 
-        public UnitOfWork(ShopContext context, IRepository<Product> productsRepository) 
+        public IRepository<ProductRating> ProductRatingRepository { get; }
+        public IRepository<Product> ProductRepository { get; }
+
+        public UnitOfWork(ShopContext context, IRepository<Product> productsRepository, IRepository<ProductRating> productRatingRepository)
         {
             _context = context;
-            _productRepository = productsRepository;
+            ProductRepository = productsRepository;
+            ProductRatingRepository = productRatingRepository;
         }
-
-        public IRepository<Product> ProductRepository => _productRepository;
 
         public async Task SaveChanges()
         {

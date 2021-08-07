@@ -1,6 +1,10 @@
+using System;
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 using CloudinaryDotNet;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -10,13 +14,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Shop.DAL.Core;
-using Shop.Business.Implementation;
-using Shop.Business.IServices;
 using Shop.DAL.Core.Entities;
-using Shop.Business;
-using Shop.DAL.Core.Repositories.Implementation;
-using Shop.DAL.Core.Repositories.Interfaces;
 using Shop.DAL.Core.UnitOfWork;
+using Shop.DAL.Core.Repositories.Interfaces;
+using Shop.DAL.Core.Repositories.Implementation;
+using Shop.Business;
+using Shop.Business.IServices;
+using Shop.Business.Implementation;
+using Shop.WebAPI.Auth;
 
 namespace Shop.WebAPI
 {
@@ -40,6 +45,26 @@ namespace Shop.WebAPI
 
             services.AddAutoMapper(typeof(AutoMap));
             services.AddControllersWithViews();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration.GetValue<string>("JsonWebToken:Issuer"),
+                        ValidateAudience = false,
+                        RequireExpirationTime = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                        RequireSignedTokens = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                            Configuration.GetValue<string>("JsonWebToken:SecretKey")))
+                    };
+                    options.SaveToken = true;
+                });
 
             services.AddSwaggerGen();
 
@@ -72,6 +97,8 @@ namespace Shop.WebAPI
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IProductService, ProductService>();
+
+            services.AddScoped<IAuthManager, AuthManager>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

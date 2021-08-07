@@ -10,9 +10,9 @@ namespace Shop.Business.Models
         public string Name { get; set; }
         public PlatformTypeEnum? Platform { get; set; }
         public DateTime? DateCreated { get; set; }
-        public float? TotalRating { get; set; }
+        public int? Rating { get; set; }
         public string Genre { get; set; }
-        public RatingEnum? Rating { get; set; }
+        public AgeRatingEnum? AgeRating { get; set; }
         public IFormFile Logo { get; set; }
         public IFormFile Background { get; set; }
         public float? Price { get; set; }

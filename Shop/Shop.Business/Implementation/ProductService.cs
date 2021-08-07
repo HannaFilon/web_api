@@ -68,9 +68,86 @@ namespace Shop.Business.Implementation
             return productDto;
         }
 
+        public async Task<IEnumerable<ProductDto>> GetDeleted()
+        {
+            var productsList = await _unitOfWork.ProductRepository.Get()
+                .IgnoreQueryFilters().Where(p => p.IsDeleted).ToListAsync();
+            var productsDtoList = _mapper.Map<List<ProductDto>>(productsList);
+
+            return productsDtoList;
+        }
+
+        public async Task<ProductDto[]> GetProducts(ParametersList listParameters)
+        {
+            var filteredProducts = GetFilteredList(listParameters.Genre, listParameters.AgeRatig);
+            if (filteredProducts == null)
+            {
+                return null;
+            }
+
+            if (listParameters.TotalRatingOrder != null && listParameters.PriceOrder != null)
+            {
+                throw new Exception("Can't order list by two parameters.");
+            }
+
+            if (listParameters.TotalRatingOrder == OrderBy.Asc)
+            {
+                filteredProducts = filteredProducts.OrderBy(p => p.TotalRating);
+            }
+            else if (listParameters.TotalRatingOrder == OrderBy.Desc)
+            {
+                filteredProducts = filteredProducts.OrderByDescending(p => p.TotalRating);
+            }
+
+            if (listParameters.PriceOrder == OrderBy.Asc)
+            {
+                filteredProducts = filteredProducts.OrderBy(p => p.Price);
+            }
+            else if (listParameters.PriceOrder == OrderBy.Desc)
+            {
+                filteredProducts = filteredProducts.OrderByDescending(p => p.Price);
+            }
+
+            var productsArray = await filteredProducts.ToArrayAsync();
+            var productsDtoArray = _mapper.Map<ProductDto[]>(productsArray);
+
+            return productsDtoArray;
+        }
+
+        private IQueryable<Product> GetFilteredList(string genreFilter, AgeRatingEnum? ageRatingFilter)
+        {
+            if (string.IsNullOrEmpty(genreFilter) && ageRatingFilter == null)
+            {
+                return null;
+            }
+
+            var products = _unitOfWork.ProductRepository.Get();
+            if (string.IsNullOrEmpty(genreFilter) && ageRatingFilter != null)
+            {
+                products = products.Where(p => p.AgeRating == (int)ageRatingFilter);
+            }
+
+            if (!string.IsNullOrEmpty(genreFilter) && ageRatingFilter == null)
+            {
+                products = products.Where(p => p.Genre == genreFilter);
+            }
+
+            if (!string.IsNullOrEmpty(genreFilter) && ageRatingFilter != null)
+            {
+                products = products.Where(p => p.AgeRating == (int)ageRatingFilter).Where(p => p.Genre == genreFilter);
+            }
+
+            return products;
+        }
+
         public async Task<ProductDto> CreateProduct(StuffModel stuffModel)
         {
             var product = _mapper.Map<Product>(stuffModel);
+            if (stuffModel.Rating.HasValue)
+            {
+                product.TotalRating = stuffModel.Rating.Value;
+            }
+
             await SaveImages(stuffModel, product);
             await _unitOfWork.ProductRepository.Add(product);
             await _unitOfWork.SaveChanges();
@@ -81,7 +158,7 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> UpdateProduct(StuffModel stuffModel)
         {
-            var product = await _unitOfWork.ProductRepository.Get().Where(p => p.Id == stuffModel.Id).SingleOrDefaultAsync();
+            var product = await _unitOfWork.ProductRepository.Get().Where(p => p.Name =="Minecraft").FirstOrDefaultAsync();
             if (product == null)
             {
                 throw new Exception("Game not found.");
@@ -94,6 +171,39 @@ namespace Shop.Business.Implementation
             var productDto = _mapper.Map<ProductDto>(product);
 
             return productDto;
+            return null;
+        }
+
+        public async Task<RatingModel> EditRating(Guid productId, int rating, string userId)
+        {
+            var product =
+                await _unitOfWork.ProductRepository.Get().Where(p => p.Id == productId).FirstOrDefaultAsync();
+            if (product == null)
+            {
+                throw new Exception("Game not found.");
+            }
+
+            var productRating = new ProductRating()
+            {
+                ProductId = productId,
+                UserId = Guid.Parse(userId),
+                Rating = rating
+            };
+
+            await _unitOfWork.ProductRatingRepository.Add(productRating);
+            var ratingSum = product.Ratings.Sum(p => p.Rating);
+            var count = product.Ratings.Count;
+            var ratingModel = new RatingModel()
+            {
+                ProductId = productId,
+                TotalRating = (float) ratingSum / count
+            };
+
+            product.TotalRating = ratingModel.TotalRating;
+            _unitOfWork.ProductRepository.Update(product);
+            await _unitOfWork.SaveChanges();
+
+            return ratingModel;
         }
 
         public async Task SoftDeleteProduct(Guid productId)

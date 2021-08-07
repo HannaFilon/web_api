@@ -54,16 +54,17 @@ namespace Shop.Business.Implementation
 
         public async Task<UserDto> SignIn(string email, string password)
         {
-            var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
+            var user = await _userManager.FindByEmailAsync(email);
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, password, false, false);
             if (result.Succeeded)
             {
-                var user = await _userManager.FindByEmailAsync(email);
+                user = await _userManager.FindByEmailAsync(email);
                 var userDto = _mapper.Map<UserDto>(user);
                 userDto.Role = await GetUserRole(user);
 
                 return userDto;
             }
-
+            
             return null;
         }
 
