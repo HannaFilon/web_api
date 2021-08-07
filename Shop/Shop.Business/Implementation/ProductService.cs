@@ -158,7 +158,7 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> UpdateProduct(StuffModel stuffModel)
         {
-            var product = await _unitOfWork.ProductRepository.Get().Where(p => p.Name =="Minecraft").FirstOrDefaultAsync();
+            var product = await _unitOfWork.ProductRepository.Get().Where(p => p.Id == stuffModel.Id).FirstOrDefaultAsync();
             if (product == null)
             {
                 throw new Exception("Game not found.");
@@ -171,7 +171,6 @@ namespace Shop.Business.Implementation
             var productDto = _mapper.Map<ProductDto>(product);
 
             return productDto;
-            return null;
         }
 
         public async Task<RatingModel> EditRating(Guid productId, int rating, string userId)
