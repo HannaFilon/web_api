@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Shop.Business.Models;
 using Shop.Business.ModelsDto;
+using Shop.Business.Pagination;
 
 namespace Shop.Business.IServices
 {
@@ -13,7 +14,7 @@ namespace Shop.Business.IServices
 
         public Task<ProductDto> GetProductInfo(Guid id);
         public Task<IEnumerable<ProductDto>> GetDeleted();
-        public Task<ProductDto[]> GetProducts(ParametersList parametersList);
+        public PagedList<ProductDto> GetProducts(ParametersList parametersList);
 
         public Task<ProductDto> CreateProduct(StuffModel stuffModel);
         public Task<ProductDto> UpdateProduct(StuffModel stuffModel);

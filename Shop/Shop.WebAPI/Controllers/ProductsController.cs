@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Shop.Business.IServices;
 using Shop.Business.Models;
 
@@ -19,20 +20,31 @@ namespace Shop.WebAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("list")]
-        public async Task<IActionResult> GetList([FromQuery] ParametersList parametersList)
+        public IActionResult GetList([FromQuery] ParametersList parametersList)
         {
             if (parametersList == null)
             {
                 return BadRequest("No query parameters given.");
             }
 
-            var productsArray = await _productService.GetProducts(parametersList);
-            if (productsArray == null)
+            var productsList = _productService.GetProducts(parametersList);
+            if (productsList == null)
             {
                 return BadRequest("Wrong filtering or sorting parameters.");
             }
 
-            return Ok(productsArray);
+            var metadata = new
+            {
+                productsList.TotalCount,
+                productsList.PageSize,
+                productsList.CurrentPage,
+                productsList.TotalPages,
+                productsList.HasNext,
+                productsList.HasPrevious
+            };
+            Response.Headers.Add("Pagination", JsonConvert.SerializeObject(metadata));
+
+            return Ok(productsList);
         }
     }
 }

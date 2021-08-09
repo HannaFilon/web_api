@@ -9,7 +9,7 @@ namespace Shop.DAL.Core.Entities
     {
         public string AddressDelivery { get; set; }
 
-        public ICollection<ProductRating> Ratings { get; set; }
+        public List<ProductRating> Ratings { get; set; } = new List<ProductRating>();
 
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Business.IServices;
 using Shop.Business.Models;
 using Shop.Business.ModelsDto;
+using Shop.Business.Pagination;
 using Shop.DAL.Core.Entities;
 using Shop.DAL.Core.UnitOfWork;
 
@@ -77,51 +79,51 @@ namespace Shop.Business.Implementation
             return productsDtoList;
         }
 
-        public async Task<ProductDto[]> GetProducts(ParametersList listParameters)
+        public PagedList<ProductDto> GetProducts(ParametersList parametersList)
         {
-            var filteredProducts = GetFilteredList(listParameters.Genre, listParameters.AgeRatig);
+            var filteredProducts = GetFilteredList(parametersList.Genre, parametersList.AgeRatig);
             if (filteredProducts == null)
             {
                 return null;
-            }
+            } ;
 
-            if (listParameters.TotalRatingOrder != null && listParameters.PriceOrder != null)
+            if (parametersList.TotalRatingOrder != null && parametersList.PriceOrder != null)
             {
                 throw new Exception("Can't order list by two parameters.");
             }
 
-            if (listParameters.TotalRatingOrder == OrderBy.Asc)
+            if (parametersList.TotalRatingOrder == OrderBy.Asc)
             {
                 filteredProducts = filteredProducts.OrderBy(p => p.TotalRating);
             }
-            else if (listParameters.TotalRatingOrder == OrderBy.Desc)
+            else if (parametersList.TotalRatingOrder == OrderBy.Desc)
             {
                 filteredProducts = filteredProducts.OrderByDescending(p => p.TotalRating);
             }
 
-            if (listParameters.PriceOrder == OrderBy.Asc)
+            if (parametersList.PriceOrder == OrderBy.Asc)
             {
                 filteredProducts = filteredProducts.OrderBy(p => p.Price);
             }
-            else if (listParameters.PriceOrder == OrderBy.Desc)
+            else if (parametersList.PriceOrder == OrderBy.Desc)
             {
                 filteredProducts = filteredProducts.OrderByDescending(p => p.Price);
             }
 
-            var productsArray = await filteredProducts.ToArrayAsync();
-            var productsDtoArray = _mapper.Map<ProductDto[]>(productsArray);
-
-            return productsDtoArray;
+            var productsDto= _mapper.Map<List<ProductDto>>(filteredProducts);
+            var productsDtoList = PagedList<ProductDto>.ToPagedList(productsDto.AsQueryable(), parametersList.PageNumber, parametersList.PageSize);
+            
+            return productsDtoList;
         }
 
         private IQueryable<Product> GetFilteredList(string genreFilter, AgeRatingEnum? ageRatingFilter)
         {
+            var products = _unitOfWork.ProductRepository.Get();
             if (string.IsNullOrEmpty(genreFilter) && ageRatingFilter == null)
             {
-                return null;
+                return products;
             }
 
-            var products = _unitOfWork.ProductRepository.Get();
             if (string.IsNullOrEmpty(genreFilter) && ageRatingFilter != null)
             {
                 products = products.Where(p => p.AgeRating == (int)ageRatingFilter);
@@ -158,13 +160,14 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> UpdateProduct(StuffModel stuffModel)
         {
-            var product = await _unitOfWork.ProductRepository.Get().Where(p => p.Id == stuffModel.Id).FirstOrDefaultAsync();
+            var product = await _unitOfWork.ProductRepository.GetByID(stuffModel.Id);
             if (product == null)
             {
                 throw new Exception("Game not found.");
             }
 
             _mapper.Map(stuffModel, product);
+            _unitOfWork.ProductRepository.Update(product);
             await SaveImages(stuffModel, product);
             _unitOfWork.ProductRepository.Update(product);
             await _unitOfWork.SaveChanges();
@@ -175,8 +178,7 @@ namespace Shop.Business.Implementation
 
         public async Task<RatingModel> EditRating(Guid productId, int rating, string userId)
         {
-            var product =
-                await _unitOfWork.ProductRepository.Get().Where(p => p.Id == productId).FirstOrDefaultAsync();
+            var product = await _unitOfWork.ProductRepository.GetByID(productId);
             if (product == null)
             {
                 throw new Exception("Game not found.");
@@ -189,13 +191,15 @@ namespace Shop.Business.Implementation
                 Rating = rating
             };
 
-            await _unitOfWork.ProductRatingRepository.Add(productRating);
+            product.Ratings.Add(productRating);
+            _unitOfWork.ProductRepository.Update(product);
+
             var ratingSum = product.Ratings.Sum(p => p.Rating);
             var count = product.Ratings.Count;
             var ratingModel = new RatingModel()
             {
                 ProductId = productId,
-                TotalRating = (float) ratingSum / count
+                TotalRating = (float)ratingSum / count
             };
 
             product.TotalRating = ratingModel.TotalRating;

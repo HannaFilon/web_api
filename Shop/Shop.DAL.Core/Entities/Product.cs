@@ -30,10 +30,10 @@ namespace Shop.DAL.Core.Entities
         [Column(TypeName = "Date")]
         public DateTime DateCreated { get; set; }
 
-        public ICollection<ProductRating> Ratings { get; set; }
+        public List<ProductRating> Ratings { get; set; } = new List<ProductRating>();
 
         [Range(0, 5, ErrorMessage = "Value for {0} must be between {1} and {2}")]
-        public float TotalRating { get; set; }
+        public float? TotalRating { get; set; }
 
         [Required]
         public bool IsDeleted { get; set; }

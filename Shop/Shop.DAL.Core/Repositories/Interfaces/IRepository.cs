@@ -19,7 +19,7 @@ namespace Shop.DAL.Core.Repositories.Interfaces
         public void Remove(TEntity obj);
         public void RemoveRange(IEnumerable<TEntity> objs);
 
-        public void Update(TEntity entityToUpdate);
+        public void Update(TEntity obj);
         public void UpdateRange(IEnumerable<TEntity> objs);
     }
 }

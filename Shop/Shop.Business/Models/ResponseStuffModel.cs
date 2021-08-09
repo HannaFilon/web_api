@@ -1,10 +1,12 @@
 ﻿using System;
+using Newtonsoft.Json;
 using Shop.Business.ModelsDto;
 
 namespace Shop.Business.Models
 {
     public class ResponseStuffModel
     {
+        [JsonIgnore]
         public Guid Id { get; set; }
         public string Name { get; set; }
         public PlatformTypeEnum Platform { get; set; }
