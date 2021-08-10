@@ -18,7 +18,7 @@ namespace Shop.DAL.Core.Repositories.Implementation
             _dbSet = context.Set<TEntity>();
         }
 
-        public virtual async Task<TEntity> GetByID(Guid id)
+        public virtual async Task<TEntity> GetById(Guid id)
         {
             var obj = await _dbSet.FindAsync(id);
 

@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Shop.Business.IServices;
 using Shop.Business.Models;
 using Shop.Business.ModelsDto;
+using Shop.Business.Pagination;
 using Shop.DAL.Core.Entities;
 using Shop.DAL.Core.UnitOfWork;
 
@@ -67,6 +69,78 @@ namespace Shop.Business.Implementation
             return productDto;
         }
 
+        public async Task<IEnumerable<ProductDto>> GetDeleted()
+        {
+            var productsList = await _unitOfWork.ProductRepository.Get()
+                .IgnoreQueryFilters().Where(p => p.IsDeleted).ToListAsync();
+            var productsDtoList = _mapper.Map<List<ProductDto>>(productsList);
+
+            return productsDtoList;
+        }
+
+        public async Task<PagedList<ProductDto>> GetProducts(ParametersList parametersList)
+        {
+            var filteredProducts = await Task.Run(() => GetFilteredList(parametersList.Genre, parametersList.AgeRatig));
+            if (filteredProducts == null)
+            {
+                return null;
+            }
+
+            if (parametersList.TotalRatingOrder != null && parametersList.PriceOrder != null)
+            {
+                throw new Exception("Can't order list by two parameters.");
+            }
+
+            if (parametersList.TotalRatingOrder == OrderBy.Asc)
+            {
+                filteredProducts = filteredProducts.OrderBy(p => p.TotalRating);
+            }
+            else if (parametersList.TotalRatingOrder == OrderBy.Desc)
+            {
+                filteredProducts = filteredProducts.OrderByDescending(p => p.TotalRating);
+            }
+
+            if (parametersList.PriceOrder == OrderBy.Asc)
+            {
+                filteredProducts = filteredProducts.OrderBy(p => p.Price);
+            }
+            else if (parametersList.PriceOrder == OrderBy.Desc)
+            {
+                filteredProducts = filteredProducts.OrderByDescending(p => p.Price);
+            }
+
+            var productsDto = _mapper.Map<List<ProductDto>>(filteredProducts); 
+            var productsDtoList = PagedList<ProductDto>.ToPagedList(productsDto.AsQueryable(), parametersList.PageNumber, parametersList.PageSize);
+            
+            return productsDtoList;
+        }
+
+        private IQueryable<Product> GetFilteredList(string genreFilter, AgeRatingEnum? ageRatingFilter)
+        {
+            var products = _unitOfWork.ProductRepository.Get();
+            if (string.IsNullOrEmpty(genreFilter) && ageRatingFilter == null)
+            {
+                return products;
+            }
+
+            if (string.IsNullOrEmpty(genreFilter) && ageRatingFilter != null)
+            {
+                products = products.Where(p => p.AgeRating == (int)ageRatingFilter);
+            }
+
+            if (!string.IsNullOrEmpty(genreFilter) && ageRatingFilter == null)
+            {
+                products = products.Where(p => p.Genre == genreFilter);
+            }
+
+            if (!string.IsNullOrEmpty(genreFilter) && ageRatingFilter != null)
+            {
+                products = products.Where(p => p.AgeRating == (int)ageRatingFilter).Where(p => p.Genre == genreFilter);
+            }
+
+            return products;
+        }
+
         public async Task<ProductDto> CreateProduct(StuffModel stuffModel)
         {
             var product = _mapper.Map<Product>(stuffModel);
@@ -80,19 +154,47 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> UpdateProduct(StuffModel stuffModel)
         {
-            var product = await _unitOfWork.ProductRepository.Get().Where(p => p.Id == stuffModel.Id).SingleOrDefaultAsync();
+            var product = await _unitOfWork.ProductRepository.GetByID(stuffModel.Id);
             if (product == null)
             {
                 throw new Exception("Game not found.");
             }
 
             _mapper.Map(stuffModel, product);
+            _unitOfWork.ProductRepository.Update(product);
             await SaveImages(stuffModel, product);
             _unitOfWork.ProductRepository.Update(product);
             await _unitOfWork.SaveChanges();
             var productDto = _mapper.Map<ProductDto>(product);
 
             return productDto;
+        }
+
+        public async Task<RatingModel> EditRating(Guid productId, int rating, string userId)
+        {
+            var product = await _unitOfWork.ProductRepository.GetByID(productId);
+            if (product == null)
+            {
+                throw new Exception("Game not found.");
+            }
+
+            var productRating = new ProductRating()
+            {
+                ProductId = productId,
+                UserId = Guid.Parse(userId),
+                Rating = rating
+            };
+
+            product.Ratings.Add(productRating);
+            _unitOfWork.ProductRepository.Update(product);
+            await _unitOfWork.SaveChanges();
+            var ratingModel = new RatingModel()
+            {
+                ProductId = productId,
+                TotalRating = product.TotalRating.GetValueOrDefault()
+            };
+
+            return ratingModel;
         }
 
         public async Task SoftDeleteProduct(Guid productId)

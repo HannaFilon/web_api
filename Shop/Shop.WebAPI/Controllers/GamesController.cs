@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Shop.Business.IServices;
 using Shop.Business.Models;
+using Shop.WebAPI.Auth;
 
 namespace Shop.WebAPI.Controllers
 {
@@ -15,11 +17,13 @@ namespace Shop.WebAPI.Controllers
     {
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
+        private readonly IAuthManager _authManager;
 
-        public GamesController(IProductService productService, IMapper mapper)
+        public GamesController(IProductService productService, IMapper mapper, IAuthManager authManager)
         {
             _productService = productService;
             _mapper = mapper;
+            _authManager = authManager;
         }
 
         [AllowAnonymous]
@@ -36,7 +40,7 @@ namespace Shop.WebAPI.Controllers
                 return StatusCode(404,
                     "No popular game platforms found.");
             }
-            
+
             return Ok(topPlatforms);
         }
 
@@ -92,12 +96,25 @@ namespace Shop.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromForm] StuffModel stuffModel)
         {
+            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
+            var jwtToken = _authManager.DecodeJwtToken(token);
+            var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("This method is unavailable.");
+            }
+
             if (stuffModel == null)
             {
                 return BadRequest("Not enough info to create a product.");
             }
-            
+
             var productDto = await _productService.CreateProduct(stuffModel);
+            if (stuffModel.Rating.HasValue)
+            {
+                var result = await EditRating(productDto.Id, stuffModel.Rating.Value, userId);
+            }
+
             if (productDto == null)
             {
                 return BadRequest("Product can't be created.");
@@ -113,9 +130,22 @@ namespace Shop.WebAPI.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateProduct([FromForm] StuffModel stuffModel)
         {
+            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
+            var jwtToken = _authManager.DecodeJwtToken(token);
+            var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("This method is unavailable.");
+            }
+
             if (stuffModel == null)
             {
                 return BadRequest("No info to update.");
+            }
+
+            if (stuffModel.Rating.HasValue)
+            {
+                var result = await EditRating(stuffModel.Id, stuffModel.Rating.Value, userId);
             }
 
             var productDto = await _productService.UpdateProduct(stuffModel);
@@ -136,6 +166,23 @@ namespace Shop.WebAPI.Controllers
             await _productService.SoftDeleteProduct(productId);
 
             return StatusCode(204);
+        }
+
+        [HttpPost("rating")]
+        private async Task<IActionResult> EditRating([FromBody] Guid productId, int rating, string userId)
+        {
+            if (productId == default || rating == default || string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("Not enough info to update rating.");
+            }
+
+            var ratingModel = await _productService.EditRating(productId, rating, userId);
+            if (ratingModel == null)
+            {
+                return BadRequest("Can't update TotalRating.");
+            }
+
+            return Ok(ratingModel);
         }
     }
 }

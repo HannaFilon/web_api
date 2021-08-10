@@ -348,3 +348,9 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/Shop/Shop.Business/Implementation/OrderService.cs
+/Shop/Shop.Business/IServices/IOrderService.cs
+/Shop/Shop.Business/ModelsDto/OrderDto.cs
+/Shop/Shop.DAL.Core/Entities/Order.cs
+/Shop/Shop.DAL.Core/Repositories/Implementation/OrderRepository.cs
+/Shop/Shop.WebAPI/Controllers/OrdersController.cs

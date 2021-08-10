@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Shop.Business.IServices;
 using Shop.Business.Models;
+using Shop.WebAPI.Auth;
 
 namespace Shop.WebAPI.Controllers
 {
@@ -12,12 +14,14 @@ namespace Shop.WebAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IEmailService _emailService;
+        private readonly IAuthManager _authManager;
 
 
-        public AuthController(IUserService userService, IEmailService emailService)
+        public AuthController(IUserService userService, IEmailService emailService, IAuthManager authManager)
         {
             _userService = userService;
             _emailService = emailService;
+            _authManager = authManager;
         }
 
 
@@ -30,8 +34,10 @@ namespace Shop.WebAPI.Controllers
             {
                 return StatusCode(401, "Wrong email or password. Try again");
             }
-            
-            return Ok();
+
+            var jwtToken = _authManager.GenerateToken(userDto, DateTime.Now);
+
+            return Ok(jwtToken);
         }
 
         [AllowAnonymous]
@@ -55,8 +61,9 @@ namespace Shop.WebAPI.Controllers
             var callback = Url.Action(nameof(ConfirmEmail), "Auth", new {email = userDto.Email, code = code},
                 Request.Scheme);
             await _emailService.SendEmailConfirmMessage(userDto.Email, callback);
+            var jwtToken = _authManager.GenerateToken(userDto, DateTime.Now);
 
-            return new StatusCodeResult(201);
+            return StatusCode(201, jwtToken);
         }
 
         [AllowAnonymous]

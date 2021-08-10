@@ -7,9 +7,17 @@ namespace Shop.DAL.Core
 {
     public class ShopContext : IdentityDbContext<User, Role, Guid>
     {
-        public ShopContext(DbContextOptions<ShopContext> options) 
+        public ShopContext(DbContextOptions<ShopContext> options)
             : base(options) { }
 
-        public DbSet<Product> Products{ get; set; }
+        public DbSet<Product> Products { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Product>()
+                .HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<ProductRating>().HasKey(sc => new { sc.ProductId, sc.UserId });
+        }
     }
 }

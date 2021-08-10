@@ -26,7 +26,7 @@ namespace Shop.Business
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(source => source.DateCreated))
                 .ForMember(dest => dest.TotalRating, opt => opt.MapFrom(source => source.TotalRating))
                 .ForMember(dest => dest.Genre, opt => opt.MapFrom(source => source.Genre))
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(source => source.Rating))
+                .ForMember(dest => dest.AgeRating, opt => opt.MapFrom(source => source.AgeRating))
                 .ForMember(dest => dest.Logo, opt => opt.MapFrom(source => source.Logo))
                 .ForMember(dest => dest.Background, opt => opt.MapFrom(source => source.Background))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(source => source.Price))
@@ -45,8 +45,8 @@ namespace Shop.Business
                     (source, destination) => !source.TotalRating.Equals(default) ? source.TotalRating : destination.TotalRating))
                 .ForMember(dest => dest.Genre, opt => opt.MapFrom(
                     (source, destination) => !string.IsNullOrEmpty(source.Genre) ? source.Genre : destination.Genre))
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(
-                    (source, destination) => source.Rating != default ? (int)source.Rating : destination.Rating))
+                .ForMember(dest => dest.AgeRating, opt => opt.MapFrom(
+                    (source, destination) => source.AgeRating != default ? (int)source.AgeRating : destination.AgeRating))
                 .ForMember(dest => dest.Logo, opt => opt.MapFrom(
                     (source, destination) => !string.IsNullOrEmpty(source.Logo) ? source.Logo : destination.Logo))
                 .ForMember(dest => dest.Background, opt => opt.MapFrom(
@@ -63,7 +63,7 @@ namespace Shop.Business
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(source => source.DateCreated))
                 .ForMember(dest => dest.TotalRating, opt => opt.MapFrom(source => source.TotalRating))
                 .ForMember(dest => dest.Genre, opt => opt.MapFrom(source => source.Genre))
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(source => source.Rating))
+                .ForMember(dest => dest.AgeRating, opt => opt.MapFrom(source => source.AgeRating))
                 .ForMember(dest => dest.Logo, opt => opt.MapFrom(source => source.Logo))
                 .ForMember(dest => dest.Background, opt => opt.MapFrom(source => source.Background))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(source => source.Price))
@@ -78,12 +78,10 @@ namespace Shop.Business
                     (source, destination) => source.Platform != null ? (int)source.Platform : destination.Platform))
                 .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(
                     (source, destination) => source.DateCreated ?? destination.DateCreated))
-                .ForMember(dest => dest.TotalRating, opt => opt.MapFrom(
-                    (source, destination) => source.TotalRating ?? destination.TotalRating))
                 .ForMember(dest => dest.Genre, opt => opt.MapFrom(
                     (source, destination) => !string.IsNullOrEmpty(source.Genre) ? source.Genre : destination.Genre))
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(
-                     (source, destination) => source.Rating != null ? (int)source.Rating : destination.Rating))
+                .ForMember(dest => dest.AgeRating, opt => opt.MapFrom(
+                     (source, destination) => source.AgeRating != null ? (int)source.AgeRating : destination.AgeRating))
                 .ForMember(dest => dest.Logo, opt => opt.MapFrom(source => ToString()))
                 .ForMember(dest => dest.Background, opt => opt.MapFrom(source => ToString()))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(

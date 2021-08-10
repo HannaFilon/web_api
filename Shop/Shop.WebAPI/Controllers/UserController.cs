@@ -1,13 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Shop.Business.IServices;
 using Shop.Business.Models;
+using Shop.WebAPI.Auth;
 
 namespace Shop.WebAPI.Controllers
 {
@@ -18,25 +17,20 @@ namespace Shop.WebAPI.Controllers
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        private const string TokenIdKey = "TokenId";
-        private const string JwtKey = "611bd2ba-c254-4a07-9308-27cb74cd5237";
+        private readonly IAuthManager _authManager;
 
-        public UserController(IUserService userService, IMapper mapper)
+        public UserController(IUserService userService, IMapper mapper, IAuthManager authManager)
         {
             _userService = userService;
             _mapper = mapper;
+            _authManager = authManager;
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserModel userModel)
         {
-            if (!HttpContext.Request.Headers.ContainsKey(TokenIdKey))
-            {
-                return BadRequest("This method is unavailable.");
-            }
-
-            var token = HttpContext.Request.Headers[TokenIdKey];
-            var userId = ValidateJwtToken(token);
+            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
+            var userId = GetCurrentUserId(token);
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");
@@ -51,13 +45,8 @@ namespace Shop.WebAPI.Controllers
         [HttpPost("password")]
         public async Task<IActionResult> UpdatePassword([FromBody] PasswordUpdateModel passwordUpdateModel)
         {
-            if (!HttpContext.Request.Headers.ContainsKey(TokenIdKey))
-            {
-                return BadRequest("This method is unavailable.");
-            }
-
-            var token = HttpContext.Request.Headers[TokenIdKey];
-            var userId = ValidateJwtToken(token);
+            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
+            var userId = GetCurrentUserId(token);
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");
@@ -75,22 +64,18 @@ namespace Shop.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserInfo()
         {
-            if (!HttpContext.Request.Headers.ContainsKey(TokenIdKey))
-            {
-                return BadRequest("This method is unavailable.");
-            }
-
-            var token = HttpContext.Request.Headers[TokenIdKey];
-            var userId = ValidateJwtToken(token);
+            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
+            var userId = GetCurrentUserId(token);
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");
             }
 
             var userDto = await _userService.GetById(userId);
+
             if (userDto == null)
             {
-                return Unauthorized("User not found");
+                return BadRequest("User not found.");
             }
 
             var userModel = _mapper.Map<UserModel>(userDto);
@@ -98,34 +83,12 @@ namespace Shop.WebAPI.Controllers
             return Ok(userModel);
         }
 
-        private string ValidateJwtToken(string token)
+        private string GetCurrentUserId(string token)
         {
-            if (string.IsNullOrWhiteSpace(token))
-                throw new SecurityTokenException("Invalid token");
+            var jwtToken = _authManager.DecodeJwtToken(token);
+            var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
 
-            try
-            {
-
-                var principal = new JwtSecurityTokenHandler()
-                    .ValidateToken(token,
-                        new TokenValidationParameters
-                        {
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateIssuerSigningKey = true,
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtKey)),
-                        },
-                        out var validatedToken);
-
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
-
-                return userId;
-            }
-            catch
-            {
-                return null;
-            }
+            return userId;
         }
     }
 }
