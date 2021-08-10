@@ -29,7 +29,7 @@ namespace Shop.Business.Implementation
             {
                 UserName = email,
                 Email = email,
-                Role = "Admin"
+                Role = "User"
             };
 
             var user = _mapper.Map<User>(userDto);
