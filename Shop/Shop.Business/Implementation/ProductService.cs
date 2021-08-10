@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
@@ -79,13 +78,13 @@ namespace Shop.Business.Implementation
             return productsDtoList;
         }
 
-        public PagedList<ProductDto> GetProducts(ParametersList parametersList)
+        public async Task<PagedList<ProductDto>> GetProducts(ParametersList parametersList)
         {
-            var filteredProducts = GetFilteredList(parametersList.Genre, parametersList.AgeRatig);
+            var filteredProducts = await Task.Run(() => GetFilteredList(parametersList.Genre, parametersList.AgeRatig));
             if (filteredProducts == null)
             {
                 return null;
-            } ;
+            }
 
             if (parametersList.TotalRatingOrder != null && parametersList.PriceOrder != null)
             {
@@ -110,7 +109,7 @@ namespace Shop.Business.Implementation
                 filteredProducts = filteredProducts.OrderByDescending(p => p.Price);
             }
 
-            var productsDto= _mapper.Map<List<ProductDto>>(filteredProducts);
+            var productsDto = _mapper.Map<List<ProductDto>>(filteredProducts); 
             var productsDtoList = PagedList<ProductDto>.ToPagedList(productsDto.AsQueryable(), parametersList.PageNumber, parametersList.PageSize);
             
             return productsDtoList;
@@ -145,11 +144,6 @@ namespace Shop.Business.Implementation
         public async Task<ProductDto> CreateProduct(StuffModel stuffModel)
         {
             var product = _mapper.Map<Product>(stuffModel);
-            if (stuffModel.Rating.HasValue)
-            {
-                product.TotalRating = stuffModel.Rating.Value;
-            }
-
             await SaveImages(stuffModel, product);
             await _unitOfWork.ProductRepository.Add(product);
             await _unitOfWork.SaveChanges();
@@ -193,18 +187,12 @@ namespace Shop.Business.Implementation
 
             product.Ratings.Add(productRating);
             _unitOfWork.ProductRepository.Update(product);
-
-            var ratingSum = product.Ratings.Sum(p => p.Rating);
-            var count = product.Ratings.Count;
+            await _unitOfWork.SaveChanges();
             var ratingModel = new RatingModel()
             {
                 ProductId = productId,
-                TotalRating = (float)ratingSum / count
+                TotalRating = product.TotalRating.GetValueOrDefault()
             };
-
-            product.TotalRating = ratingModel.TotalRating;
-            _unitOfWork.ProductRepository.Update(product);
-            await _unitOfWork.SaveChanges();
 
             return ratingModel;
         }

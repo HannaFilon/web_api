@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
 namespace Shop.DAL.Core.Entities
@@ -33,7 +34,7 @@ namespace Shop.DAL.Core.Entities
         public List<ProductRating> Ratings { get; set; } = new List<ProductRating>();
 
         [Range(0, 5, ErrorMessage = "Value for {0} must be between {1} and {2}")]
-        public float? TotalRating { get; set; }
+        public float? TotalRating => Ratings.Sum(p => p.Rating) / Ratings.Count;
 
         [Required]
         public bool IsDeleted { get; set; }

@@ -14,7 +14,7 @@ namespace Shop.Business.IServices
 
         public Task<ProductDto> GetProductInfo(Guid id);
         public Task<IEnumerable<ProductDto>> GetDeleted();
-        public PagedList<ProductDto> GetProducts(ParametersList parametersList);
+        public Task<PagedList<ProductDto>> GetProducts(ParametersList parametersList);
 
         public Task<ProductDto> CreateProduct(StuffModel stuffModel);
         public Task<ProductDto> UpdateProduct(StuffModel stuffModel);
