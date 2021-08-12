@@ -88,6 +88,8 @@ namespace Shop.Business
                     (source, destination) => source.Price ?? destination.Price))
                 .ForMember(dest => dest.Count, opt => opt.MapFrom(
                     (source, destination) => source.Count ?? destination.Count));
+
+            CreateMap<Order, OrderDto>().ReverseMap();
         }
     }
 }

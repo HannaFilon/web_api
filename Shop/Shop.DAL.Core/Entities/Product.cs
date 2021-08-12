@@ -51,5 +51,7 @@ namespace Shop.DAL.Core.Entities
         public float Price { get; set; }
 
         public int Count { get; set; }
+        public List<Order> Orders { get; set; }
+        public ICollection<OrderProduct> OrderProducts { get; set; }
     }
 }

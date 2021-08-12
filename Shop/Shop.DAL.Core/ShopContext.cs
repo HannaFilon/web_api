@@ -11,6 +11,7 @@ namespace Shop.DAL.Core
             : base(options) { }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -18,6 +19,7 @@ namespace Shop.DAL.Core
             modelBuilder.Entity<Product>()
                 .HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<ProductRating>().HasKey(sc => new { sc.ProductId, sc.UserId });
+            modelBuilder.Entity<OrderProduct>().HasKey(sc => new { sc.OrderId, sc.ProductId });
         }
     }
 }

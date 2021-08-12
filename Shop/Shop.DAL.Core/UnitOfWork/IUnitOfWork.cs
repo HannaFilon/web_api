@@ -6,8 +6,9 @@ namespace Shop.DAL.Core.UnitOfWork
 {
     public interface IUnitOfWork
     {
-        IRepository<ProductRating> ProductRatingRepository { get; }
         IRepository<Product> ProductRepository { get; }
+        IRepository<ProductRating> ProductRatingRepository { get; }
+        IRepository<Order> OrderRepository { get; }
         public Task SaveChanges();
     }
 }

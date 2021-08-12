@@ -7,11 +7,12 @@ namespace Shop.Business.IServices
 {
     public interface IOrderService
     {
-        public Task CreateOrder();
-        public Task<OrderDto> AddProductToOrder(Guid OrderId, Guid ProductId);
-        public Task RemoveProductFromOrder(Guid OrderId, Guid ProductID);
-        public Task<List<ProductDto>> GetOrder(Guid OrderId);
-        public Task<List<OrderDto>> GetOrders(Guid UserId);
-        public Task BuyOrder(List<Guid> OrderIds);
+        public Task<OrderDto> GetOrder(Guid orderDto);
+        public Task<List<OrderDto>> GetUserOrders(string userId);
+        public Task<List<ProductDto>> GetOrderProducts(Guid orderId);
+        public Task<OrderDto> CreateOrder(string userId);
+        public Task<OrderDto> AddProductToOrder(Guid orderId, Guid productId, int amount);
+        public Task RemoveProductFromOrder(Guid orderId, List<Guid> products);
+        public Task BuyOrder(Guid orderId);
     }
 }
