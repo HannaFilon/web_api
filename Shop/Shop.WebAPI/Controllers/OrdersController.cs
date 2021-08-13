@@ -26,7 +26,7 @@ namespace Shop.WebAPI.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddOrder(Guid productId, int amount)
+        public async Task<IActionResult> AddOrder(Guid? orderId, Guid productId, int amount)
         {
             var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
             var userId = GetCurrentUserId(token);
@@ -35,38 +35,22 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("This method is unavailable.");
             }
 
-            var orderDto = await _orderService.CreateOrder(userId);
+            var orderDto = await _orderService.GetOrder(orderId.GetValueOrDefault());
             if (orderDto == null)
             {
-                return BadRequest("Order not found.");
+                orderDto = await _orderService.CreateOrder(userId, productId, amount);
+                if (orderDto == null)
+                {
+                    return BadRequest("Order not found.");
+                }
             }
-
-            orderDto = await _orderService.AddProductToOrder(orderDto.OrderId, productId, amount);
+            else
+            {
+                orderDto = await _orderService.AddProductToOrder(orderDto.OrderId, productId, amount);
+            }
 
             return StatusCode(201, orderDto);
-        }
-
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> AddProductToOrder(Guid orderId, Guid productId, int amount)
-        {
-            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
-            var userId = GetCurrentUserId(token);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest("This method is unavailable.");
             }
-
-            var orderDto = await _orderService.GetOrder(orderId);
-            if (orderDto == null)
-            {
-                return BadRequest("Order not found.");
-            }
-
-            orderDto = await _orderService.AddProductToOrder(orderId, productId, amount);
-
-            return Ok(orderDto);
-        }
 
         [Authorize]
         [HttpGet]
@@ -92,14 +76,14 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("Order not found.");
             }
 
-            var productDtosList = await _orderService.GetOrderProducts(orderId.Value);
+            var productDtosList = orderDto.Products.Select(o => new {ProductId = o.ProductId, Amount = o.Amount}).ToList();
 
             return Ok(productDtosList);
         }
 
         [Authorize]
         [HttpDelete]
-        public async Task<IActionResult> DeleteProductsFromOrder(Guid orderId, List<Guid> productsList)
+        public async Task<IActionResult> DeleteProductsFromOrder(Guid orderId, [FromForm] List<Guid> productsList)
         {
             await _orderService.RemoveProductFromOrder(orderId, productsList);
            
@@ -107,7 +91,7 @@ namespace Shop.WebAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost]
+        [HttpPost("buy")]
         public async Task<IActionResult> BuyOrder(Guid orderId)
         {
             await _orderService.BuyOrder(orderId);

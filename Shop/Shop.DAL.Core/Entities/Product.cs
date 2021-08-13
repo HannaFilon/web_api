@@ -60,6 +60,7 @@ namespace Shop.DAL.Core.Entities
 
         [Required]
         public int Count { get; set; }
+
         public List<OrderProduct> OrderProducts { get; set; }
     }
 }

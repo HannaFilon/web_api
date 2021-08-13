@@ -89,7 +89,16 @@ namespace Shop.Business
                 .ForMember(dest => dest.Count, opt => opt.MapFrom(
                     (source, destination) => source.Count ?? destination.Count));
 
-            CreateMap<Order, OrderDto>().ReverseMap();
+            CreateMap<OrderProduct, OrderProductDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(source => source.OrderId))
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(source => source.ProductId))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(source => source.Amount));
+
+            CreateMap<Order, OrderDto>()
+                .ForMember(dest => dest.OrderId, opt => opt.MapFrom(source => source.OrderId))
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(source => source.UserId))
+                .ForMember(dest => dest.Completed, opt => opt.MapFrom(source => source.Completed))
+                .ForMember(dest => dest.Products, opt => opt.MapFrom(source => source.OrderProducts));
         }
     }
 }

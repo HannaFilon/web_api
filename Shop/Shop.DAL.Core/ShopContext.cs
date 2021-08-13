@@ -22,6 +22,15 @@ namespace Shop.DAL.Core
                 .IsRequired(false);
             modelBuilder.Entity<ProductRating>().HasKey(sc => new { sc.ProductId, sc.UserId });
             modelBuilder.Entity<OrderProduct>().HasKey(sc => new { sc.OrderId, sc.ProductId });
+            modelBuilder.Entity<User>(
+                typeBuilder =>
+                {
+                    typeBuilder.HasMany(user => user.Orders)
+                        .WithOne(order => order.User)
+                        .HasForeignKey(order => order.OrderId)
+                        .IsRequired(false);
+                });
+
         }
     }
 }

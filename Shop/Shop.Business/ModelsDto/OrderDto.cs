@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-using Shop.DAL.Core.Entities;
+using System.Text.Json.Serialization;
 
 namespace Shop.Business.ModelsDto
 {
@@ -10,7 +9,7 @@ namespace Shop.Business.ModelsDto
         public Guid OrderId { get; set; }
         [JsonIgnore]
         public Guid UserId { get; set; }
-        public bool Comleted { get; set; }
-        public List<OrderProduct> Products { get; set; }
+        public bool Completed { get; set; }
+        public List<OrderProductDto> Products { get; set; } = new List<OrderProductDto>();
     }
 }

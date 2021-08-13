@@ -9,6 +9,7 @@ namespace Shop.DAL.Core.UnitOfWork
         IRepository<Product> ProductRepository { get; }
         IRepository<ProductRating> ProductRatingRepository { get; }
         IRepository<Order> OrderRepository { get; }
+        public IRepository<OrderProduct> OrderProductRepository { get; }
         public Task SaveChanges();
     }
 }

@@ -8,11 +8,11 @@ namespace Shop.DAL.Core.Entities
     public class Order
     {
         public Guid OrderId { get; set; }
-        public bool Comleted { get; set; }
+        public bool Completed { get; set; }
 
         public Guid UserId { get; set; }
         public User User { get; set; }
-        
+
         public List<OrderProduct> OrderProducts { get; set; }
     }
 }

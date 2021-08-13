@@ -12,6 +12,7 @@ namespace Shop.DAL.Core.UnitOfWork
         public IRepository<Product> ProductRepository { get; }
         public IRepository<ProductRating> ProductRatingRepository { get; }
         public IRepository<Order> OrderRepository { get; }
+        public IRepository<OrderProduct> OrderProductRepository { get; }
 
         public UnitOfWork(ShopContext context, IRepository<Product> productsRepository, 
             IRepository<ProductRating> productRatingRepository, IRepository<Order> orderRepository)
