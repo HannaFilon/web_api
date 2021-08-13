@@ -32,9 +32,17 @@ namespace Shop.DAL.Core.Entities
         public DateTime DateCreated { get; set; }
 
         public List<ProductRating> Ratings { get; set; } = new List<ProductRating>();
+        private float? _totalRating;
 
         [Range(0, 5, ErrorMessage = "Value for {0} must be between {1} and {2}")]
-        public float? TotalRating => Ratings.Sum(p => p.Rating) / Ratings.Count;
+        public float? TotalRating
+        {
+            get => _totalRating; 
+            private set 
+            {
+                _totalRating = (float)Ratings.Sum(p => p.Rating) / Ratings.Count;
+            }
+        }
 
         [Required]
         public bool IsDeleted { get; set; }
@@ -50,8 +58,8 @@ namespace Shop.DAL.Core.Entities
 
         public float Price { get; set; }
 
+        [Required]
         public int Count { get; set; }
-        public List<Order> Orders { get; set; }
-        public ICollection<OrderProduct> OrderProducts { get; set; }
+        public List<OrderProduct> OrderProducts { get; set; }
     }
 }

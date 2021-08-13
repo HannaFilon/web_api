@@ -17,7 +17,9 @@ namespace Shop.DAL.Core
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Product>()
-                .HasQueryFilter(p => !p.IsDeleted);
+                .HasQueryFilter(p => !p.IsDeleted)
+                .Property(p => p.TotalRating)
+                .IsRequired(false);
             modelBuilder.Entity<ProductRating>().HasKey(sc => new { sc.ProductId, sc.UserId });
             modelBuilder.Entity<OrderProduct>().HasKey(sc => new { sc.OrderId, sc.ProductId });
         }

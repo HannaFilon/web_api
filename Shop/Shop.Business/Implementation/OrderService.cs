@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.Business.IServices;
 using Shop.Business.ModelsDto;
@@ -15,7 +16,7 @@ namespace Shop.Business.Implementation
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-
+        private readonly UserManager<User> _userManager;
         public OrderService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -30,16 +31,11 @@ namespace Shop.Business.Implementation
             return orderDto;
         }
 
-        public async Task<List<OrderDto>> GetUserOrders(string userIdStr)
+        public async Task<List<OrderDto>> GetUserOrders(string userId)
         {
-            var result = Guid.TryParse(userIdStr, out Guid userId);
-            if (!result)
-            {
-                throw new Exception("Wrong userId.");
-            }
+            var user = await _userManager.FindByIdAsync(userId);
 
-            var ordersList = await _unitOfWork.OrderRepository.Get()
-                .Where(o => o.UserId == userId).ToListAsync();
+            var ordersList = user.Orders.Select(o => o);
             var ordersDtoList = _mapper.Map<List<OrderDto>>(ordersList);
 
             return ordersDtoList;
@@ -53,12 +49,12 @@ namespace Shop.Business.Implementation
                 throw new Exception("Order not found.");
             }
 
-            var productsList = order.Products.Select(p => p);
-            var productDtosList = _mapper.Map<List<ProductDto>>(productsList); 
+            var productsList = order.OrderProducts.Select(p => p.Product);
+            var productDtosList = _mapper.Map<List<ProductDto>>(productsList);
 
             return productDtosList;
         }
-        
+
 
         public async Task<OrderDto> CreateOrder(string userId)
         {
@@ -66,8 +62,7 @@ namespace Shop.Business.Implementation
             {
                 OrderId = Guid.NewGuid(),
                 UserId = Guid.Parse(userId),
-                Comleted = false,
-                Products = new List<Product>()
+                Comleted = false
             };
 
             await _unitOfWork.OrderRepository.Add(order);
@@ -102,19 +97,26 @@ namespace Shop.Business.Implementation
                 throw new Exception("Not enough products left.");
             }
 
-            var orderProduct = new OrderProduct();
-            if (order.Products.Contains(product))
+            var orderProduct = order.OrderProducts
+                .Select(op => op)
+                .FirstOrDefault(op => op.ProductId == productId);
+            if (orderProduct != null)
             {
-                orderProduct = order.OrderProducts.Select(op => op).First(op => op.ProductId == productId);
                 var amountAdd = orderProduct.Amount;
                 order.OrderProducts.Remove(orderProduct);
                 _unitOfWork.OrderRepository.Update(order);
-                amount += amountAdd;
+                orderProduct.Amount += amount;
+            }
+            else
+            {
+                orderProduct = new OrderProduct()
+                {
+                    Amount = amount,
+                    ProductId = productId,
+                    OrderId = orderId
+                };
             }
 
-            orderProduct.Amount = amount;
-            orderProduct.ProductId = productId;
-            orderProduct.OrderId = orderId;
             order.OrderProducts.Add(orderProduct);
             _unitOfWork.OrderRepository.Update(order);
             await _unitOfWork.SaveChanges();
@@ -140,15 +142,25 @@ namespace Shop.Business.Implementation
             foreach (var productId in productIds)
             {
                 var product = await _unitOfWork.ProductRepository.GetById(productId);
-                if (product == null && !order.Products.Contains(product))
+                if (product == null)
                 {
-                    throw new Exception("Product not found");
+                    throw new Exception("Product not found.");
                 }
 
-                var amount = order.OrderProducts.Where(op => op.OrderId == orderId && op.ProductId == productId)
-                    .Select(op => op.Amount).FirstOrDefault();
+                var orderProduct = order.OrderProducts
+                    .Select(op => op)
+                    .FirstOrDefault(p => p.ProductId == productId);
+                if (orderProduct == null)
+                {
+                    throw new Exception("No such product in order.");
+                }
+
+                var amount = order.OrderProducts
+                    .Where(op => op.OrderId == orderId && op.ProductId == productId)
+                    .Select(op => op.Amount)
+                    .FirstOrDefault();
                 await RemoveAmount(productId, amount);
-                order.Products.Remove(product);
+                order.OrderProducts.Remove(orderProduct);
                 _unitOfWork.OrderRepository.Update(order);
             }
 

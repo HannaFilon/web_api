@@ -10,6 +10,7 @@ namespace Shop.DAL.Core.Entities
         public string AddressDelivery { get; set; }
 
         public List<ProductRating> Ratings { get; set; } = new List<ProductRating>();
+        public List<Order> Orders { get; set; }
 
     }
 }
