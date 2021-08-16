@@ -20,14 +20,14 @@ namespace Shop.WebAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet("list")]
-        public IActionResult GetList([FromQuery] ParametersList parametersList)
+        public async Task<IActionResult> GetList([FromQuery] ParametersList parametersList)
         {
             if (parametersList == null)
             {
                 return BadRequest("No query parameters given.");
             }
 
-            var productsList = _productService.GetProducts(parametersList);
+            var productsList = await _productService.GetProducts(parametersList);
             if (productsList == null)
             {
                 return BadRequest("Wrong filtering or sorting parameters.");

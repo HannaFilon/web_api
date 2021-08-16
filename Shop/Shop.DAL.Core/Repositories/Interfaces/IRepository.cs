@@ -7,7 +7,7 @@ namespace Shop.DAL.Core.Repositories.Interfaces
 {
     public interface IRepository<TEntity>:IDisposable where TEntity: class
     {
-        public Task<TEntity> GetByID(Guid id);
+        public Task<TEntity> GetById(Guid id);
         public Task<IEnumerable<TEntity>> GetAll();
 
         IQueryable<TEntity> Get();

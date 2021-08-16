@@ -97,6 +97,7 @@ namespace Shop.WebAPI
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IOrderService, OrderService>();
 
             services.AddScoped<IAuthManager, AuthManager>();
 

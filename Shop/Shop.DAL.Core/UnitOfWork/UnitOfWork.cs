@@ -9,14 +9,18 @@ namespace Shop.DAL.Core.UnitOfWork
     {
         private readonly ShopContext _context;
 
-        public IRepository<ProductRating> ProductRatingRepository { get; }
         public IRepository<Product> ProductRepository { get; }
+        public IRepository<ProductRating> ProductRatingRepository { get; }
+        public IRepository<Order> OrderRepository { get; }
+        public IRepository<OrderProduct> OrderProductRepository { get; }
 
-        public UnitOfWork(ShopContext context, IRepository<Product> productsRepository, IRepository<ProductRating> productRatingRepository)
+        public UnitOfWork(ShopContext context, IRepository<Product> productsRepository, 
+            IRepository<ProductRating> productRatingRepository, IRepository<Order> orderRepository)
         {
             _context = context;
             ProductRepository = productsRepository;
             ProductRatingRepository = productRatingRepository;
+            OrderRepository = orderRepository;
         }
 
         public async Task SaveChanges()

@@ -58,7 +58,7 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> GetProductInfo(Guid productId)
         {
-            var product = await _unitOfWork.ProductRepository.GetByID(productId);
+            var product = await _unitOfWork.ProductRepository.GetById(productId);
             if (product == null)
             {
                 throw new Exception("Game not found.");
@@ -154,7 +154,7 @@ namespace Shop.Business.Implementation
 
         public async Task<ProductDto> UpdateProduct(StuffModel stuffModel)
         {
-            var product = await _unitOfWork.ProductRepository.GetByID(stuffModel.Id);
+            var product = await _unitOfWork.ProductRepository.GetById(stuffModel.Id);
             if (product == null)
             {
                 throw new Exception("Game not found.");
@@ -172,7 +172,7 @@ namespace Shop.Business.Implementation
 
         public async Task<RatingModel> EditRating(Guid productId, int rating, string userId)
         {
-            var product = await _unitOfWork.ProductRepository.GetByID(productId);
+            var product = await _unitOfWork.ProductRepository.GetById(productId);
             if (product == null)
             {
                 throw new Exception("Game not found.");
@@ -199,7 +199,7 @@ namespace Shop.Business.Implementation
 
         public async Task SoftDeleteProduct(Guid productId)
         {
-            var product = await _unitOfWork.ProductRepository.GetByID(productId);
+            var product = await _unitOfWork.ProductRepository.GetById(productId);
             if (product == null)
             {
                 throw new Exception("Game not found.");

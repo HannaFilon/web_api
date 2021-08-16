@@ -61,9 +61,8 @@ namespace Shop.WebAPI.Controllers
             var callback = Url.Action(nameof(ConfirmEmail), "Auth", new {email = userDto.Email, code = code},
                 Request.Scheme);
             await _emailService.SendEmailConfirmMessage(userDto.Email, callback);
-            var jwtToken = _authManager.GenerateToken(userDto, DateTime.Now);
 
-            return StatusCode(201, jwtToken);
+            return StatusCode(201);
         }
 
         [AllowAnonymous]
