@@ -54,15 +54,15 @@ namespace Shop.Business.Implementation
 
         public async Task<OrderDto> CreateOrder(string userId, Guid productId, int amount)
         {
+            if (productId == default || amount == default)
+            {
+                throw new Exception("Can not create order.");
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 throw new Exception("User not found.");
-            }
-
-            if (productId == default || amount == default)
-            {
-                throw new Exception("Can not create order.");
             }
 
             var order = new Order
@@ -145,7 +145,7 @@ namespace Shop.Business.Implementation
         }
 
 
-        public async Task RemoveProductFromOrder(Guid orderId, List<Guid> productIds)
+        public async Task RemoveProductFromOrder(Guid orderId, List<Guid> productsId)
         {
             var order = await _unitOfWork.OrderRepository.Get().AsTracking()
                 .Include(o => o.OrderProducts)
@@ -160,27 +160,25 @@ namespace Shop.Business.Implementation
                 throw new Exception("Order is completed, can not remove products from order.");
             }
 
-            foreach (var productId in productIds)
+            var products = _unitOfWork.ProductRepository.Get()
+                .Select(p => p)
+                .Where(p => productsId.Contains(p.Id));
+            if (products.Count() != productsId.Count)
             {
-                var product = await _unitOfWork.ProductRepository.GetById(productId);
-                if (product == null)
-                {
-                    throw new Exception("Product not found.");
-                }
+                throw new Exception("Wrong parameters. Not all products found.");
+            }
 
+            foreach (var p in products)
+            {
                 var orderProduct = order.OrderProducts
                     .Select(op => op)
-                    .FirstOrDefault(p => p.ProductId == productId);
+                    .FirstOrDefault(op => op.ProductId == p.Id);
                 if (orderProduct == null)
                 {
                     throw new Exception("No such product in order.");
                 }
 
-                var amount = order.OrderProducts
-                    .Where(op => op.OrderId == orderId && op.ProductId == productId)
-                    .Select(op => op.Amount)
-                    .FirstOrDefault();
-                await RemoveAmount(productId, amount);
+                await RemoveAmount(orderProduct.ProductId, orderProduct.Amount);
                 order.OrderProducts.Remove(orderProduct);
                 _unitOfWork.OrderRepository.Update(order);
             }
