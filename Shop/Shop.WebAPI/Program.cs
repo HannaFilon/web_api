@@ -11,19 +11,19 @@ namespace Shop.WebAPI
     {
         public static void Main(string[] args)
         {
-             Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .Enrich.WithExceptionDetails()
-                    .Enrich.FromLogContext()
-                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information || e.Level == LogEventLevel.Verbose)
-                        .WriteTo.File(new CompactJsonFormatter(), @"Logs\\info.log"))
-                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Debug )
-                        .WriteTo.File(new CompactJsonFormatter(), @"Logs\\debug.log"))
-                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Warning)
-                        .WriteTo.File(new CompactJsonFormatter(), @"Logs\\warn.log"))
-                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Error || e.Level == LogEventLevel.Fatal)
-                        .WriteTo.File(new CompactJsonFormatter(), @"Logs\\err.log"))
-                    .CreateLogger();
+            Log.Logger = new LoggerConfiguration()
+                   .MinimumLevel.Debug()
+                   .Enrich.WithExceptionDetails()
+                   .Enrich.FromLogContext()
+                   .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Information || e.Level == LogEventLevel.Verbose)
+                       .WriteTo.File(new CompactJsonFormatter(), @"Logs\\info.log"))
+                   .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Debug)
+                       .WriteTo.File(new CompactJsonFormatter(), @"Logs\\debug.log"))
+                   .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Warning)
+                       .WriteTo.File(new CompactJsonFormatter(), @"Logs\\warn.log"))
+                   .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Error || e.Level == LogEventLevel.Fatal)
+                       .WriteTo.File(new CompactJsonFormatter(), @"Logs\\err.log"))
+                   .CreateLogger();
 
             Log.Information("Starting up the application");
             CreateHostBuilder(args).Build().Run();
@@ -31,10 +31,10 @@ namespace Shop.WebAPI
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-            .UseSerilog()
+                .UseSerilog()
             .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
