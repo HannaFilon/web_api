@@ -23,6 +23,7 @@ namespace Shop.WebAPI
                        .WriteTo.File(new CompactJsonFormatter(), @"Logs\\warn.log"))
                    .WriteTo.Logger(l => l.Filter.ByIncludingOnly(e => e.Level == LogEventLevel.Error || e.Level == LogEventLevel.Fatal)
                        .WriteTo.File(new CompactJsonFormatter(), @"Logs\\err.log"))
+                   .WriteTo.Console()
                    .CreateLogger();
 
             Log.Information("Starting up the application");
