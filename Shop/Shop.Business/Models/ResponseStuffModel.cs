@@ -1,5 +1,5 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Shop.Business.ModelsDto;
 
 namespace Shop.Business.Models

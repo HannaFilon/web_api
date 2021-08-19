@@ -1,13 +1,16 @@
 using System;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
+using System.Text.Json.Serialization;
 using CloudinaryDotNet;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +47,6 @@ namespace Shop.WebAPI
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddAutoMapper(typeof(AutoMap));
-            services.AddControllersWithViews();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -103,6 +105,20 @@ namespace Shop.WebAPI
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+            services.AddResponseCompression();
+            services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Optimal;
+            });
+
+            services.AddMemoryCache();
+
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.IgnoreNullValues = true;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -117,6 +133,8 @@ namespace Shop.WebAPI
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
+
+            app.UseResponseCompression();
 
             app.UseStaticFiles();
             app.UseHttpsRedirection();

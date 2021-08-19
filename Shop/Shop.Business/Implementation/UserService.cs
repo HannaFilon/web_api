@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Shop.Business.IServices;
 using Shop.Business.Models;
+using Shop.Business.ModelsDto;
 using Shop.DAL.Core.Entities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Shop.Business.ModelsDto;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Shop.Business.Implementation
 {
@@ -15,12 +16,14 @@ namespace Shop.Business.Implementation
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _cache;
 
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
+        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IMemoryCache cache)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
+            _cache = cache;
         }
 
         public async Task<IdentityResult> SignUp(string email, string password)
@@ -49,6 +52,8 @@ namespace Shop.Business.Implementation
                 throw new Exception("User role can not be added.");
             }
 
+            _cache.Set(userDto.Id, userDto);
+
             return resultCreating;
         }
 
@@ -56,16 +61,21 @@ namespace Shop.Business.Implementation
         {
             var user = await _userManager.FindByEmailAsync(email);
             var result = await _signInManager.PasswordSignInAsync(user.UserName, password, false, false);
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                user = await _userManager.FindByEmailAsync(email);
-                var userDto = _mapper.Map<UserDto>(user);
-                userDto.Role = await GetUserRole(user);
+                return null;
+            }
 
+            if (_cache.TryGetValue(user.Id, out UserDto userDto))
+            {
                 return userDto;
             }
-            
-            return null;
+
+            user = await _userManager.FindByEmailAsync(email);
+            userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = await GetUserRole(user);
+
+            return userDto;
         }
 
         public async Task<bool> CheckPassword(string email, string password)
@@ -97,14 +107,20 @@ namespace Shop.Business.Implementation
 
         public async Task<UserDto> GetById(string userId)
         {
+            if (_cache.TryGetValue(userId, out UserDto userDto))
+            {
+                return userDto;
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 return null;
             }
 
-            var userDto = _mapper.Map<UserDto>(user);
+            userDto = _mapper.Map<UserDto>(user);
             userDto.Role = await GetUserRole(user);
+            _cache.Set(userDto.Id, userDto);
 
             return userDto;
         }
@@ -124,8 +140,14 @@ namespace Shop.Business.Implementation
                 throw new Exception("Update failed.");
             }
 
-            var userDto = _mapper.Map<UserDto>(user);
+            if (_cache.TryGetValue(userId, out UserDto userDto))
+            {
+                _cache.Remove(userId);
+            }
+
+            userDto = _mapper.Map<UserDto>(user);
             userDto.Role = await GetUserRole(user);
+            _cache.Set(userDto.Id, userDto);
 
             return userDto;
         }
