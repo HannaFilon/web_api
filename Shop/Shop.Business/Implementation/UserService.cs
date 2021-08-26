@@ -7,7 +7,6 @@ using Shop.DAL.Core.Entities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Shop.Business.Implementation
 {
@@ -16,14 +15,14 @@ namespace Shop.Business.Implementation
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
-        private readonly IMemoryCache _cache;
+        private readonly ICacheService _cacheService;
 
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IMemoryCache cache)
+        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, ICacheService cacheService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
-            _cache = cache;
+            _cacheService = cacheService;
         }
 
         public async Task<IdentityResult> SignUp(string email, string password)
@@ -52,49 +51,21 @@ namespace Shop.Business.Implementation
                 throw new Exception("User role can not be added.");
             }
 
-            _cache.Set(userDto.Id, userDto);
+            _cacheService.AddToCache(userDto, userDto.Id);
 
-            return resultCreating;
+            return resultAdding;
         }
 
         public async Task<UserDto> SignIn(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
             var result = await _signInManager.PasswordSignInAsync(user.UserName, password, false, false);
             if (!result.Succeeded)
-            {
-                return null;
-            }
-
-            if (_cache.TryGetValue(user.Id, out UserDto userDto))
-            {
-                return userDto;
-            }
-
-            user = await _userManager.FindByEmailAsync(email);
-            userDto = _mapper.Map<UserDto>(user);
-            userDto.Role = await GetUserRole(user);
-
-            return userDto;
-        }
-
-        public async Task<bool> CheckPassword(string email, string password)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return false;
-            }
-
-            var result = await _userManager.CheckPasswordAsync(user, password);
-
-            return result;
-        }
-
-        public async Task<UserDto> GetByEmail(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
             {
                 return null;
             }
@@ -105,9 +76,24 @@ namespace Shop.Business.Implementation
             return userDto;
         }
 
+        public async Task<UserDto> GetByEmail(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Role = await GetUserRole(user);
+
+            return userDto;
+        }
+
         public async Task<UserDto> GetById(string userId)
         {
-            if (_cache.TryGetValue(userId, out UserDto userDto))
+            var userDto = _cacheService.Get<UserDto>(userId);
+            if (userDto != null)
             {
                 return userDto;
             }
@@ -115,12 +101,12 @@ namespace Shop.Business.Implementation
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return null;
+                throw new ArgumentException("User not found.");
             }
 
             userDto = _mapper.Map<UserDto>(user);
             userDto.Role = await GetUserRole(user);
-            _cache.Set(userDto.Id, userDto);
+            _cacheService.AddToCache(userDto, userDto.Id);
 
             return userDto;
         }
@@ -130,7 +116,7 @@ namespace Shop.Business.Implementation
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                throw new ArgumentNullException("User not found.");
+                throw new ArgumentException("User not found.");
             }
 
             _mapper.Map(userModel, user);
@@ -140,14 +126,15 @@ namespace Shop.Business.Implementation
                 throw new Exception("Update failed.");
             }
 
-            if (_cache.TryGetValue(userId, out UserDto userDto))
+            var userDto = _cacheService.Get<UserDto>(userId);
+            if(userDto != null)
             {
-                _cache.Remove(userId);
+                _cacheService.RemoveFromCache(userId);
             }
 
             userDto = _mapper.Map<UserDto>(user);
             userDto.Role = await GetUserRole(user);
-            _cache.Set(userDto.Id, userDto);
+            _cacheService.AddToCache(userDto, userDto.Id);
 
             return userDto;
         }
@@ -157,11 +144,16 @@ namespace Shop.Business.Implementation
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                throw new ArgumentNullException("User not found.");
+                throw new ArgumentException("User not found.");
             }
 
             var result = await
                 _userManager.ChangePasswordAsync(user, passwordUpdateModel.Password, passwordUpdateModel.NewPassword);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Update failed.");
+            }
+
             return result;
         }
 

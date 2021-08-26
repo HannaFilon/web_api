@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
@@ -36,7 +37,12 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("This method is unavailable.");
             }
 
-            var userDto = await _userService.UpdateUser(userId, userModel);
+            if (userModel == null)
+            {
+                return BadRequest("Not enough parameters to update user.");
+            }
+
+            var userDto = await _userService.UpdateUser(Guid.NewGuid().ToString(), userModel);
             _mapper.Map(userDto, userModel);
 
             return Ok(userModel);
@@ -52,11 +58,12 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("This method is unavailable.");
             }
 
-            var result = await _userService.UpdatePassword(userId, passwordUpdateModel);
-            if (!result.Succeeded)
+            if (passwordUpdateModel == null)
             {
-                return BadRequest("Password can't be updated.");
+                return BadRequest("Not enough parameters to update password.");
             }
+
+            await _userService.UpdatePassword(userId, passwordUpdateModel);
 
             return StatusCode(204);
         }
@@ -72,12 +79,6 @@ namespace Shop.WebAPI.Controllers
             }
 
             var userDto = await _userService.GetById(userId);
-
-            if (userDto == null)
-            {
-                return BadRequest("User not found.");
-            }
-
             var userModel = _mapper.Map<UserModel>(userDto);
 
             return Ok(userModel);
@@ -86,7 +87,12 @@ namespace Shop.WebAPI.Controllers
         private string GetCurrentUserId(string token)
         {
             var jwtToken = _authManager.DecodeJwtToken(token);
-            var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
+            if (jwtToken == null)
+            {
+                throw new Exception("Wrong Token.");
+            }
+
+            var userId = jwtToken.Claims.FirstOrDefault(x => x.Type == "id").Value;
 
             return userId;
         }

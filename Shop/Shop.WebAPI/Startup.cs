@@ -113,6 +113,7 @@ namespace Shop.WebAPI
             });
 
             services.AddMemoryCache();
+            services.AddSingleton<ICacheService,CacheService>();
 
             services.AddMvc().AddJsonOptions(options =>
             {

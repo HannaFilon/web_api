@@ -32,7 +32,7 @@ namespace Shop.WebAPI.Controllers
             var userDto = await _userService.SignIn(loginModel.Email, loginModel.Password);
             if (userDto == null)
             {
-                return StatusCode(401, "Wrong email or password. Try again");
+                return StatusCode(401, "Wrong password. Try again");
             }
 
             var jwtToken = _authManager.GenerateToken(userDto, DateTime.Now);
