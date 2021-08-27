@@ -81,7 +81,7 @@ namespace Shop.Business.Implementation
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
-                throw new ArgumentException("User not found.");
+                return null;
             }
 
             var userDto = _mapper.Map<UserDto>(user);
