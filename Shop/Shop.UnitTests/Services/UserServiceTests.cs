@@ -141,7 +141,7 @@ namespace Shop.UnitTests.Services
         }
 
         [Fact]
-        public async void GetByEmail_ThrowsException()
+        public async void GetByEmail_ReturnsNull()
         {
             var fakeUserManager = A.Fake<UserManager<User>>();
 
@@ -151,7 +151,8 @@ namespace Shop.UnitTests.Services
 
             var userService = new UserService(fakeUserManager, null, null, null);
 
-            await Assert.ThrowsAsync<ArgumentException>(async () => await userService.GetByEmail("email"));
+            var result = await userService.GetByEmail("email");
+            Assert.Null(result);
         }
 
         [Fact]

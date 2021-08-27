@@ -42,7 +42,7 @@ namespace Shop.WebAPI.Controllers
                 return BadRequest("Not enough parameters to update user.");
             }
 
-            var userDto = await _userService.UpdateUser(Guid.NewGuid().ToString(), userModel);
+            var userDto = await _userService.UpdateUser(userId, userModel);
             _mapper.Map(userDto, userModel);
 
             return Ok(userModel);
