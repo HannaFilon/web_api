@@ -20,6 +20,7 @@ namespace Shop.DAL.Core.Entities
         public Guid Id { get; set; }
 
         [Required]
+        [StringLength(100)]
         public string Name { get; set; }
 
         [Required]

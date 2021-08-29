@@ -160,9 +160,8 @@ namespace Shop.Business.Implementation
                 throw new Exception("Game not found.");
             }
 
-            _mapper.Map(stuffModel, product);
-            _unitOfWork.ProductRepository.Update(product);
             await SaveImages(stuffModel, product);
+            _mapper.Map(stuffModel, product);
             _unitOfWork.ProductRepository.Update(product);
             await _unitOfWork.SaveChanges();
             var productDto = _mapper.Map<ProductDto>(product);
@@ -242,8 +241,15 @@ namespace Shop.Business.Implementation
                     File = new FileDescription(imageFile.FileName, ms),
                 };
 
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                imageUrl = uploadResult.Url?.AbsoluteUri;
+                try
+                {
+                    var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                    imageUrl = uploadResult.Url?.AbsoluteUri;
+                }
+                catch (Exception)
+                {
+                    return string.Empty;
+                }
             }
 
             return imageUrl;

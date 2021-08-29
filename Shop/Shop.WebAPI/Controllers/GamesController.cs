@@ -1,10 +1,9 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Shop.Business.IServices;
 using Shop.Business.Models;
 using Shop.WebAPI.Auth;
@@ -13,17 +12,15 @@ namespace Shop.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GamesController : ControllerBase
+    public class GamesController : BaseController
     {
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
-        private readonly IAuthManager _authManager;
 
-        public GamesController(IProductService productService, IMapper mapper, IAuthManager authManager)
+        public GamesController(IProductService productService, IMapper mapper, IAuthManager authManager) : base(authManager)
         {
             _productService = productService;
             _mapper = mapper;
-            _authManager = authManager;
         }
 
         [AllowAnonymous]
@@ -96,9 +93,7 @@ namespace Shop.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromForm] StuffModel stuffModel)
         {
-            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
-            var jwtToken = _authManager.DecodeJwtToken(token);
-            var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
+            var userId = await GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");
@@ -130,9 +125,7 @@ namespace Shop.WebAPI.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateProduct([FromForm] StuffModel stuffModel)
         {
-            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
-            var jwtToken = _authManager.DecodeJwtToken(token);
-            var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
+            var userId = await GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");

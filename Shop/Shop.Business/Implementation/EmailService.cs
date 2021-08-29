@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Shop.Business.IServices;
 using Shop.DAL.Core.Entities;
 using System;
@@ -14,12 +15,14 @@ namespace Shop.Business.Implementation
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly SmtpClient _smtpClient;
+        private readonly IConfiguration _config;
 
-        public EmailService(UserManager<User> userManager, IMapper mapper, SmtpClient smtpClient)
+        public EmailService(UserManager<User> userManager, IMapper mapper, SmtpClient smtpClient, IConfiguration config)
         {
             _userManager = userManager;
             _mapper = mapper;
             _smtpClient = smtpClient;
+            _config = config;
         }
 
         public async Task<IdentityResult> ConfirmEmail(string email, string code)
@@ -43,12 +46,13 @@ namespace Shop.Business.Implementation
                 throw new ArgumentNullException("Url is null.");
             }
 
+            var senderEmail = _config.GetSection("Email:Smtp:SenderEmail");
             var message = new MailMessage
             {
                 IsBodyHtml = true,
                 Subject = "Email confirmation",
                 Body = $"Please confirm your account by clicking this link: <a href=\"{callback}\">link</a>",
-                From = new MailAddress("annfilon16@gmail.com"),
+                From = new MailAddress(senderEmail.Value),
             };
 
             message.To.Add(new MailAddress(email));

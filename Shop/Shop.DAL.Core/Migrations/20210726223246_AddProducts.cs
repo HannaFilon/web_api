@@ -20,7 +20,7 @@ namespace Shop.DAL.Core.Migrations
 
             migrationBuilder.InsertData(
                table: "Products",
-               columns: new[] { "Id", "Name", "Platform", "DateCreated"},
+               columns: new[] { "Id", "Name", "Platform", "DateCreated" },
                values: new object[]
                {
                     Guid.NewGuid(),
@@ -97,7 +97,7 @@ namespace Shop.DAL.Core.Migrations
 
             migrationBuilder.InsertData(
                 table: "Products",
-                columns: new[] { "Id", "Name", "Platform", "DateCreated"},
+                columns: new[] { "Id", "Name", "Platform", "DateCreated" },
                 values: new object[]
                 {
                     Guid.NewGuid(),
@@ -119,14 +119,13 @@ namespace Shop.DAL.Core.Migrations
 
             migrationBuilder.InsertData(
                 table: "Products",
-                columns: new[] { "Id", "Name", "Platform", "DateCreated", "TotalRating" },
+                columns: new[] { "Id", "Name", "Platform", "DateCreated" },
                 values: new object[]
                 {
                     Guid.NewGuid(),
                     "The Witcher 3: Wild Hunt",
                     2,
-                    DateTime.Parse("18.05.2015"),
-                    4.65
+                    DateTime.Parse("18.05.2015")
                 });
 
             migrationBuilder.InsertData(
@@ -153,7 +152,7 @@ namespace Shop.DAL.Core.Migrations
 
             migrationBuilder.InsertData(
                 table: "Products",
-                columns: new[] { "Id", "Name", "Platform", "DateCreated"},
+                columns: new[] { "Id", "Name", "Platform", "DateCreated" },
                 values: new object[]
                 {
                     Guid.NewGuid(),

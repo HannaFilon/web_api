@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shop.Business.IServices;
@@ -14,24 +11,21 @@ namespace Shop.WebAPI.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : BaseController
     {
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
-        private readonly IAuthManager _authManager;
 
-        public UserController(IUserService userService, IMapper mapper, IAuthManager authManager)
+        public UserController(IUserService userService, IMapper mapper, IAuthManager authManager) : base(authManager)
         {
             _userService = userService;
             _mapper = mapper;
-            _authManager = authManager;
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdateUser([FromBody] UserModel userModel)
         {
-            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
-            var userId = GetCurrentUserId(token);
+            var userId = await GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");
@@ -51,8 +45,7 @@ namespace Shop.WebAPI.Controllers
         [HttpPost("password")]
         public async Task<IActionResult> UpdatePassword([FromBody] PasswordUpdateModel passwordUpdateModel)
         {
-            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
-            var userId = GetCurrentUserId(token);
+            var userId = await GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");
@@ -71,8 +64,7 @@ namespace Shop.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserInfo()
         {
-            var token = await HttpContext.GetTokenAsync("Bearer", "access_token");
-            var userId = GetCurrentUserId(token);
+            var userId = await GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
                 return BadRequest("This method is unavailable.");
@@ -84,17 +76,5 @@ namespace Shop.WebAPI.Controllers
             return Ok(userModel);
         }
 
-        private string GetCurrentUserId(string token)
-        {
-            var jwtToken = _authManager.DecodeJwtToken(token);
-            if (jwtToken == null)
-            {
-                throw new Exception("Wrong Token.");
-            }
-
-            var userId = jwtToken.Claims.FirstOrDefault(x => x.Type == "id").Value;
-
-            return userId;
-        }
     }
 }

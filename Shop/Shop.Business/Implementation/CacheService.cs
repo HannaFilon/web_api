@@ -22,7 +22,7 @@ namespace Shop.Business.Implementation
             if (!_cache.TryGetValue(key, out T cacheEntry))
             {
                 cacheEntry = o;
-                _cache.Set(key, cacheEntry);
+                _cache.Set(key, cacheEntry, TimeSpan.FromMinutes(15));
             }
         }
 
